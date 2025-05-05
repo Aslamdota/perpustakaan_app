@@ -27,10 +27,26 @@ class BookListScreen extends StatelessWidget {
               itemCount: books.length,
               itemBuilder: (context, index) {
                 final book = books[index];
-                return ListTile(
-                  title: Text(book['title']),
-                  subtitle: Text(book['author']),
-                  trailing: Text('${book['year']}'),
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: ListTile(
+                    title: Text(book['title']),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Author: ${book['author']}'),
+                        Text('Publisher: ${book['publisher']}'),
+                        Text('ISBN: ${book['isbn']}'),
+                        Text('Year: ${book['publication_year']}'),
+                        Text('Stock: ${book['stock']}'),
+                      ],
+                    ),
+                    isThreeLine: true,
+                    trailing: const Icon(Icons.arrow_forward),
+                    onTap: () {
+                      // Tambahkan logika untuk detail buku jika diperlukan
+                    },
+                  ),
                 );
               },
             );
