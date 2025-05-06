@@ -80,4 +80,43 @@ class ApiService {
       throw Exception('Failed to create return: ${response.body}');
     }
   }
+
+  //login
+  Future<bool> login(String username, String password) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'username': username, 'password': password}),
+    );
+
+    if (response.statusCode == 200) {
+      // Simpan token atau sesi pengguna
+      jsonDecode(response.body);
+      // Contoh: Simpan token ke shared preferences
+      // await SharedPreferences.getInstance().then((prefs) {
+      //   prefs.setString('token', data['token']);
+      // });
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  //logout
+  Future<bool> logout() async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/logout'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      // Hapus token atau sesi pengguna
+      // await SharedPreferences.getInstance().then((prefs) {
+      //   prefs.remove('token');
+      // });
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

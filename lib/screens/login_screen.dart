@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'register_screen.dart';
 import 'home_screen.dart';
 
@@ -10,12 +12,42 @@ class LoginScreen extends StatelessWidget {
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
 
-    void login() {
-      // Integrasikan dengan API login
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+    Future<void> login() async {
+      final String email = emailController.text;
+      final String password = passwordController.text;
+
+      // Endpoint API login
+      const String apiUrl = 'https://127.0.0.1:8000/api/login';
+
+      try {
+        final response = await http.post(
+          Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'email': email, 'password': password}),
+        );
+
+        if (response.statusCode == 200) {
+          // Login berhasil, navigasi ke halaman utama
+          Navigator.pushReplacement(
+            // ignore: use_build_context_synchronously
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        } else {
+          // Tampilkan pesan error jika login gagal
+          final error = jsonDecode(response.body)['message'] ?? 'Login gagal';
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(error)),
+          );
+        }
+      } catch (e) {
+        // Tangani error koneksi atau lainnya
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Terjadi kesalahan: $e')),
+        );
+      }
     }
 
     return Scaffold(
