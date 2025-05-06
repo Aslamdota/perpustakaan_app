@@ -1,9 +1,14 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:library_frontend/screens/home_screen.dart';
 
 class ApiService {
   final String baseUrl = 'http://127.0.0.1:8000/api';
-  final String token = 'YOUR_ACCESS_TOKEN'; // Ganti dengan token autentikasi Anda
+  final String token = 'YOUR_ACCESS_TOKEN';
+  
+  BuildContext? get context => null; // Ganti dengan token autentikasi Anda
 
   // Helper untuk membuat header dengan autentikasi
   Map<String, String> _headers() {
@@ -82,23 +87,47 @@ class ApiService {
   }
 
   //login
-  Future<bool> login(String username, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'username': username, 'password': password}),
-    );
+  Future<void> login(dynamic emailController, dynamic passwordController) async {
+  final String email = emailController.text;
+  final String password = passwordController.text;
 
-    if (response.statusCode == 200) {
-      // Simpan token atau sesi pengguna
-      jsonDecode(response.body);
-      // Contoh: Simpan token ke shared preferences
-      // await SharedPreferences.getInstance().then((prefs) {
-      //   prefs.setString('token', data['token']);
-      // });
-      return true;
-    } else {
-      return false;
+  const String apiUrl = 'http://127.0.0.1:8000/api/login';
+
+  try {
+    if (kDebugMode) {
+      print('Mengirim data: Email: $email, Password: $password');
+    }
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'password': password}),
+      );
+
+      if (kDebugMode) {
+        print('Response status: ${response.statusCode}');
+      }
+      if (kDebugMode) {
+        print('Response body: ${response.body}');
+      }
+
+      if (response.statusCode == 200) {
+        Navigator.pushReplacement(
+          context!,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      } else {
+        final error = jsonDecode(response.body)['message'] ?? 'Login gagal';
+        ScaffoldMessenger.of(context!).showSnackBar(
+          SnackBar(content: Text(error)),
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error: $e');
+      }
+      ScaffoldMessenger.of(context!).showSnackBar(
+        SnackBar(content: Text('Terjadi kesalahan: $e')),
+      );
     }
   }
 

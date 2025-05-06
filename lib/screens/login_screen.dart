@@ -1,8 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'register_screen.dart';
 import 'home_screen.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -13,21 +14,36 @@ class LoginScreen extends StatelessWidget {
     final TextEditingController passwordController = TextEditingController();
 
     Future<void> login() async {
-      final String email = emailController.text;
+      final String email = emailController.text.trim();
       final String password = passwordController.text;
 
       // Endpoint API login
-      const String apiUrl = 'https://127.0.0.1:8000/api/login';
+      const String apiUrl = 'http://127.0.0.1:8000/api/login';
 
       try {
+        // Kirim permintaan POST ke backend
         final response = await http.post(
           Uri.parse(apiUrl),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'email': email, 'password': password}),
         );
 
+        // Debugging: Cetak respons dari backend
+        if (kDebugMode) {
+          print('Response status: ${response.statusCode}');
+        }
+        if (kDebugMode) {
+          print('Response body: ${response.body}');
+        }
+
         if (response.statusCode == 200) {
-          // Login berhasil, navigasi ke halaman utama
+          // Login berhasil
+          final data = jsonDecode(response.body);
+          if (kDebugMode) {
+            print('Decoded response: $data');
+          } // Debugging: Print the decoded response
+
+          // Navigasi ke halaman utama
           Navigator.pushReplacement(
             // ignore: use_build_context_synchronously
             context,
@@ -35,14 +51,16 @@ class LoginScreen extends StatelessWidget {
           );
         } else {
           // Tampilkan pesan error jika login gagal
-          final error = jsonDecode(response.body)['message'] ?? 'Login gagal';
           // ignore: use_build_context_synchronously
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(error)),
+            const SnackBar(content: Text('Email atau password salah')),
           );
         }
       } catch (e) {
         // Tangani error koneksi atau lainnya
+        if (kDebugMode) {
+          print('Error: $e');
+        }
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Terjadi kesalahan: $e')),
