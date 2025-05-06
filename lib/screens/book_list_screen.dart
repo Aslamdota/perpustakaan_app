@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
@@ -21,17 +20,7 @@ class _BookListScreenState extends State<BookListScreen> {
 
   void _loadBooks() {
     setState(() {
-      _booksFuture = apiService.getBooks().then((books) {
-        if (kDebugMode) {
-          print('Books loaded successfully: $books');
-        }
-        return books;
-      }).catchError((error) {
-        if (kDebugMode) {
-          print('Error loading books: $error');
-        }
-        throw error; // Re-throw to let FutureBuilder handle it
-      });
+      _booksFuture = apiService.getBooks();
     });
   }
 
@@ -39,73 +28,49 @@ class _BookListScreenState extends State<BookListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('List Buku'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pushReplacementNamed(context, '/home');
-          },
-        ),
+        title: const Text('Daftar Buku'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadBooks,
+          ),
+        ],
       ),
       body: FutureBuilder<List<dynamic>>(
         future: _booksFuture,
         builder: (context, snapshot) {
-          if (kDebugMode) {
-            print('Builder called. ConnectionState: ${snapshot.connectionState}');
-          }
-          if (kDebugMode) {
-            print('HasData: ${snapshot.hasData}, Data: ${snapshot.data}');
-          }
-          if (kDebugMode) {
-            print('HasError: ${snapshot.hasError}, Error: ${snapshot.error}');
-          }
-
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
+          } else if (snapshot.hasError) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Error loading books'),
+                  const Text('Gagal memuat data buku'),
                   Text(snapshot.error.toString()),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _loadBooks,
-                    child: const Text('Retry'),
+                    child: const Text('Coba Lagi'),
                   ),
                 ],
               ),
             );
-          }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No books found'));
-          }
-
-          final books = snapshot.data!;
-          if (kDebugMode) {
-            print('Building list with ${books.length} books');
-          }
-
-          return RefreshIndicator(
-            onRefresh: () async => _loadBooks(),
-            child: ListView.builder(
-              physics:
-                  const AlwaysScrollableScrollPhysics(), // Ensure scroll works
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(
+              child: Text('Tidak ada buku yang tersedia.'),
+            );
+          } else {
+            final books = snapshot.data!;
+            return ListView.builder(
+              padding: const EdgeInsets.all(16.0),
               itemCount: books.length,
               itemBuilder: (context, index) {
                 final book = books[index];
-                if (kDebugMode) {
-                  print('Building item $index: $book');
-                }
-
                 return Card(
-                  margin: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 8.0),
+                  margin: const EdgeInsets.symmetric(vertical: 8.0),
                   child: ListTile(
+                    leading: const Icon(Icons.book, size: 40.0),
                     title: Text(book['title'] ?? 'No Title'),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,23 +78,20 @@ class _BookListScreenState extends State<BookListScreen> {
                         Text('Author: ${book['author'] ?? 'Unknown'}'),
                         Text('Publisher: ${book['publisher'] ?? 'Unknown'}'),
                         Text('ISBN: ${book['isbn'] ?? 'N/A'}'),
-                        Text(
-                            'Year: ${book['publication_year']?.toString() ?? 'N/A'}'),
+                        Text('Year: ${book['publication_year']?.toString() ?? 'N/A'}'),
                         Text('Stock: ${book['stock']?.toString() ?? '0'}'),
-                        if (book['category'] != null)
-                          Text('Category: ${book['category']['name']}'),
                       ],
                     ),
                     isThreeLine: true,
                     trailing: const Icon(Icons.arrow_forward),
                     onTap: () {
-                      // Handle book tap
+                      // Tambahkan logika untuk detail buku jika diperlukan
                     },
                   ),
                 );
               },
-            ),
-          );
+            );
+          }
         },
       ),
     );

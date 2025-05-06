@@ -35,42 +35,42 @@ class _HomeScreenState extends State<HomeScreen> {
       case 'books':
         return const BookListScreen();
       case 'members':
-        return MemberListScreen();
+        return const MemberListScreen();
       case 'loans':
-        return LoanListScreen();
+        return const LoanListScreen();
       case 'returns':
-        return ReturnListScreen();
+        return const ReturnListScreen();
       default:
         return _buildHomeContent();
     }
   }
 
   Widget _buildHomeContent() {
-    return GridView.count(
-      crossAxisCount: 2,
-      padding: const EdgeInsets.all(16.0),
-      crossAxisSpacing: 16.0,
-      mainAxisSpacing: 16.0,
-      children: [
-        _buildHomeIcon(
-          icon: Icons.book,
-          label: 'Books',
-          onTap: () => navigate('books'),
-        ),
-        _buildHomeIcon(
-          icon: Icons.people,
-          label: 'Members',
-          onTap: () => navigate('members'),
-        ),
-        _buildHomeIcon(
-          icon: Icons.library_books,
-          label: 'Loans',
-          onTap: () => navigate('loans'),
-        ),
-        _buildHomeIcon(
-          icon: Icons.assignment_return,
-          label: 'Returns',
-          onTap: () => navigate('returns'),
+  return GridView.count(
+    crossAxisCount: 2,
+    padding: const EdgeInsets.all(16.0),
+    crossAxisSpacing: 16.0,
+    mainAxisSpacing: 16.0,
+    children: [
+      _buildHomeIcon(
+        icon: Icons.book,
+        label: 'Books',
+        onTap: () => Navigator.pushNamed(context, '/books'),
+      ),
+      _buildHomeIcon(
+        icon: Icons.people,
+        label: 'Members',
+        onTap: () => Navigator.pushNamed(context, '/members'),
+      ),
+      _buildHomeIcon(
+        icon: Icons.library_books,
+        label: 'Loans',
+        onTap: () => Navigator.pushNamed(context, '/loans'),
+      ),
+      _buildHomeIcon(
+        icon: Icons.assignment_return,
+        label: 'Returns',
+        onTap: () => Navigator.pushNamed(context, '/returns'),
         ),
       ],
     );

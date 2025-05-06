@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:library_frontend/screens/home_screen.dart';
 import 'package:library_frontend/screens/loan_list_screen.dart';
-import 'package:library_frontend/screens/login_screen.dart';
-import 'package:library_frontend/screens/book_list_screen.dart';
 import 'package:library_frontend/screens/member_list_screen.dart';
 import 'package:library_frontend/screens/return_list_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'screens/book_list_screen.dart';
+import 'screens/home_screen.dart';
+import 'screens/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,25 +31,14 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.system,
       initialRoute: isLoggedIn ? '/home' : '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),
-        '/book': (context) => const BookListScreen(),
-        '/member': (context) => MemberListScreen(),
-        '/loan': (context) => LoanListScreen(),
-        '/return': (context) => ReturnListScreen(),
-      },
-      onGenerateRoute: (settings) {
-        return MaterialPageRoute(
-          builder: (context) => Scaffold(
-            body: Center(
-              child: Text('No route defined for ${settings.name}'),
-            ),
-          ),
-        );
+        '/books': (context) => const BookListScreen(),
+        '/members': (context) => const MemberListScreen(),
+        '/loans': (context) => const LoanListScreen(),
+        '/returns': (context) => const ReturnListScreen(),
       },
     );
   }

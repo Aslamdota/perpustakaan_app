@@ -58,29 +58,18 @@ class ApiService {
         headers: _headers(),
       );
 
-      if (kDebugMode) {
-        print('API Response: ${response.statusCode} - ${response.body}');
-      }
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['status'] == 'success') {
-          final books = data['data']['data'] ?? [];
-          if (kDebugMode) {
-            print('Successfully parsed ${books.length} books');
-          }
-          return books;
+          return data['data']['data'] ?? [];
         } else {
-          throw Exception('API returned error: ${data['message']}');
+          throw Exception('API Error: ${data['message']}');
         }
       } else {
         throw Exception('Failed to load books: ${response.statusCode}');
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error in getBooks: $e');
-      }
-      rethrow;
+      throw Exception('Error fetching books: $e');
     }
   }
 
