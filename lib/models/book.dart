@@ -1,14 +1,22 @@
 class Book {
-  final int? id;
+  final int id;
   final String title;
   final String author;
-  final int? year;
+  final String? publisher;
+  final String? isbn;
+  final int? publicationYear;
+  final int? stock;
+  final Map<String, dynamic>? category;
 
   Book({
-    this.id,
+    required this.id,
     required this.title,
     required this.author,
-    this.year,
+    this.publisher,
+    this.isbn,
+    this.publicationYear,
+    this.stock,
+    this.category, required int year,
   });
 
   factory Book.fromJson(Map<String, dynamic> json) {
@@ -16,15 +24,14 @@ class Book {
       id: json['id'],
       title: json['title'],
       author: json['author'],
-      year: json['year'],
+      publisher: json['publisher'],
+      isbn: json['isbn'],
+      publicationYear: json['publication_year'],
+      stock: json['stock'],
+      category: json['category'], 
+      year: json['publication_year'] ?? 0,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'author': author,
-      'year': year,
-    };
-  }
+  get year => null;
 }

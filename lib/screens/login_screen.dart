@@ -1,104 +1,140 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'home_screen.dart';
-import 'register_screen.dart';
+import 'package:library_frontend/services/api_service.dart';
+import 'package:library_frontend/screens/home_screen.dart';
+import 'package:library_frontend/screens/register_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final TextEditingController emailController = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
+  State<LoginScreen> createState() => _LoginScreenState();
+}
 
-    Future<void> login() async {
-      final String email = emailController.text.trim();
-      final String password = passwordController.text;
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final ApiService apiService = ApiService();
+  bool isLoading = false;
 
-      // Endpoint API login
-      const String apiUrl = 'http://127.0.0.1:8000/api/login';
+  Future<void> _handleLogin() async {
+    setState(() {
+      isLoading = true;
+    });
 
-      try {
-        // Kirim permintaan POST ke backend
-        final response = await http.post(
-          Uri.parse(apiUrl),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'email': email, 'password': password}),
-        );
+    final email = emailController.text.trim();
+    final password = passwordController.text;
 
-        // Debugging: Cetak respons dari backend
+    try {
+      final result = await apiService.login(email: email, password: password);
+      if (kDebugMode) {
+        print('API Response: $result');
+      } // Debug
+
+      if (result['success']) {
+        // Correct token access - directly from data['access_token']
+        final token = result['data']['access_token'];
         if (kDebugMode) {
-          print('Response status: ${response.statusCode}');
-        }
-        if (kDebugMode) {
-          print('Response body: ${response.body}');
-        }
+          print('Token received: $token');
+        } // Debug
 
-        if (response.statusCode == 200) {
-          // Login berhasil
-          final data = jsonDecode(response.body);
+        if (token != null && token.isNotEmpty) {
+          // Save token
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('token', token);
           if (kDebugMode) {
-            print('Decoded response: $data');
-          } // Debugging: Print the decoded response
+            print('Token saved successfully');
+          } // Debug
 
-          // Navigasi ke halaman utama
-          Navigator.pushReplacement(
-            // ignore: use_build_context_synchronously
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
+          // Show success message
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Login berhasil!')),
+            );
+
+            // Navigate to HomeScreen
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+            );
+          }
         } else {
-          // Tampilkan pesan error jika login gagal
-          // ignore: use_build_context_synchronously
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Token tidak valid')),
+            );
+          }
+        }
+      } else {
+        final message = result['message'] ?? 'Login gagal';
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Email atau password salah')),
+            SnackBar(content: Text(message)),
           );
         }
-      } catch (e) {
-        // Tangani error koneksi atau lainnya
-        if (kDebugMode) {
-          print('Error: $e');
-        }
-        // ignore: use_build_context_synchronously
+      }
+    } catch (e) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Terjadi kesalahan: $e')),
+          SnackBar(content: Text('Error: $e')),
         );
       }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
+  }
 
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Login', style: TextStyle(fontSize: 24)),
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                const Text('Login', style: TextStyle(fontSize: 24)),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: emailController,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                ),
+                TextField(
+                  controller: passwordController,
+                  decoration: const InputDecoration(labelText: 'Password'),
+                  obscureText: true,
+                ),
+                const SizedBox(height: 16),
+                isLoading
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                        onPressed: _handleLogin,
+                        child: const Text('Login'),
+                      ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                    );
+                  },
+                  child: const Text('Belum punya akun? Daftar'),
+                ),
+              ],
             ),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: login,
-              child: const Text('Login'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const RegisterScreen()),
-                );
-              },
-              child: const Text('Belum punya akun? Daftar'),
-            ),
-          ],
+          ),
         ),
       ),
     );

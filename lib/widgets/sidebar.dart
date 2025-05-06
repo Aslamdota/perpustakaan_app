@@ -5,6 +5,15 @@ class Sidebar extends StatelessWidget {
 
   const Sidebar({super.key, required this.onNavigate});
 
+  void handleNavigation(BuildContext context, String destination) {
+    Navigator.pop(context); // Menutup drawer
+    if (destination == 'logout') {
+      Navigator.pushReplacementNamed(context, '/login');
+    } else {
+      onNavigate(destination);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -20,35 +29,32 @@ class Sidebar extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.home),
             title: const Text('Home'),
-            onTap: () => onNavigate('home'),
+            onTap: () => handleNavigation(context, 'home'),
           ),
           ListTile(
             leading: const Icon(Icons.book),
             title: const Text('Books'),
-            onTap: () => onNavigate('books'),
+            onTap: () => handleNavigation(context, 'books'),
           ),
           ListTile(
             leading: const Icon(Icons.people),
             title: const Text('Members'),
-            onTap: () => onNavigate('members'),
+            onTap: () => handleNavigation(context, 'members'),
           ),
           ListTile(
             leading: const Icon(Icons.library_books),
             title: const Text('Loans'),
-            onTap: () => onNavigate('loans'),
+            onTap: () => handleNavigation(context, 'loans'),
           ),
           ListTile(
             leading: const Icon(Icons.assignment_return),
             title: const Text('Returns'),
-            onTap: () => onNavigate('returns'),
+            onTap: () => handleNavigation(context, 'returns'),
           ),
           ListTile(
             leading: const Icon(Icons.logout),
             title: const Text('Logout'),
-            onTap: () {
-              onNavigate('logout');
-              Navigator.pushReplacementNamed(context, '/login'); // Navigasi ke login
-            },
+            onTap: () => handleNavigation(context, 'logout'),
           ),
         ],
       ),

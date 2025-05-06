@@ -25,14 +25,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void toggleTheme() {
     setState(() {
-      currentTheme = currentTheme == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+      currentTheme =
+          currentTheme == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
     });
   }
 
   Widget _getScreen() {
     switch (currentScreen) {
       case 'books':
-        return BookListScreen();
+        return const BookListScreen();
       case 'members':
         return MemberListScreen();
       case 'loans':
@@ -75,18 +76,24 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildHomeIcon({required IconData icon, required String label, required VoidCallback onTap}) {
+  Widget _buildHomeIcon(
+      {required IconData icon,
+      required String label,
+      required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Card(
         elevation: 4.0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 48.0, color: Theme.of(context).primaryColor),
             const SizedBox(height: 8.0),
-            Text(label, style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
+            Text(label,
+                style: const TextStyle(
+                    fontSize: 16.0, fontWeight: FontWeight.bold)),
           ],
         ),
       ),

@@ -1,69 +1,133 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:library_frontend/screens/home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   final String baseUrl = 'http://127.0.0.1:8000/api';
-  final String token = 'YOUR_ACCESS_TOKEN';
-  
-  BuildContext? get context => null; // Ganti dengan token autentikasi Anda
+  String? token;
 
-  // Helper untuk membuat header dengan autentikasi
+  ApiService() {
+    _init();
+  }
+
+  // Inisialisasi async
+  Future<void> _init() async {
+    await _loadToken();
+  }
+
+  // Load token dari SharedPreferences
+  Future<void> _loadToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    token = prefs.getString('token');
+  }
+
+  // Simpan token ke SharedPreferences dan ke memori
+  Future<void> setToken(String newToken) async {
+    token = newToken;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', newToken);
+  }
+
+  // Hapus token dari SharedPreferences
+  Future<void> clearToken() async {
+    token = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+  }
+
+  // Ambil token dari SharedPreferences dari luar
+  Future<String?> getStoredToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
+
+  // Header HTTP dengan atau tanpa token
   Map<String, String> _headers() {
     return {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
+      if (token != null && token!.isNotEmpty) 'Authorization': 'Bearer $token',
     };
   }
 
-  // Ambil daftar buku
   Future<List<dynamic>> getBooks() async {
-    final response = await http.get(Uri.parse('$baseUrl/books'), headers: _headers());
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return data['data']; // Pastikan struktur JSON sesuai
-    } else {
-      throw Exception('Failed to load books: ${response.body}');
+    try {
+      await _loadToken();
+      final response = await http.get(
+        Uri.parse('$baseUrl/books'),
+        headers: _headers(),
+      );
+
+      if (kDebugMode) {
+        print('API Response: ${response.statusCode} - ${response.body}');
+      }
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'success') {
+          final books = data['data']['data'] ?? [];
+          if (kDebugMode) {
+            print('Successfully parsed ${books.length} books');
+          }
+          return books;
+        } else {
+          throw Exception('API returned error: ${data['message']}');
+        }
+      } else {
+        throw Exception('Failed to load books: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error in getBooks: $e');
+      }
+      rethrow;
     }
   }
 
-  // Ambil daftar anggota
   Future<List<dynamic>> getMembers() async {
-    final response = await http.get(Uri.parse('$baseUrl/members'), headers: _headers());
+    await _loadToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/members'),
+      headers: _headers(),
+    );
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return data['data']; // Pastikan struktur JSON sesuai
+      return data['data'] ?? [];
     } else {
       throw Exception('Failed to load members: ${response.body}');
     }
   }
 
-  // Ambil daftar peminjaman
   Future<List<dynamic>> getLoans() async {
-    final response = await http.get(Uri.parse('$baseUrl/loans'), headers: _headers());
+    await _loadToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/loans'),
+      headers: _headers(),
+    );
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return data['data']; // Pastikan struktur JSON sesuai
+      return data['data'] ?? [];
     } else {
       throw Exception('Failed to load loans: ${response.body}');
     }
   }
 
-  // Ambil daftar pengembalian
   Future<List<dynamic>> getReturns() async {
-    final response = await http.get(Uri.parse('$baseUrl/returns'), headers: _headers());
+    await _loadToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/returns'),
+      headers: _headers(),
+    );
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return data['data']; // Pastikan struktur JSON sesuai
+      return data['data'] ?? [];
     } else {
       throw Exception('Failed to load returns: ${response.body}');
     }
   }
 
-  // Tambahkan peminjaman baru
   Future<void> createLoan(Map<String, dynamic> loanData) async {
+    await _loadToken();
     final response = await http.post(
       Uri.parse('$baseUrl/loans'),
       headers: _headers(),
@@ -74,8 +138,8 @@ class ApiService {
     }
   }
 
-  // Tambahkan pengembalian baru
   Future<void> createReturn(Map<String, dynamic> returnData) async {
+    await _loadToken();
     final response = await http.post(
       Uri.parse('$baseUrl/returns'),
       headers: _headers(),
@@ -86,17 +150,13 @@ class ApiService {
     }
   }
 
-  //login
-  Future<void> login(dynamic emailController, dynamic passwordController) async {
-  final String email = emailController.text;
-  final String password = passwordController.text;
-
-  const String apiUrl = 'http://127.0.0.1:8000/api/login';
-
-  try {
-    if (kDebugMode) {
-      print('Mengirim data: Email: $email, Password: $password');
-    }
+  // Login dan simpan token
+  Future<Map<String, dynamic>> login({
+    required String email,
+    required String password,
+  }) async {
+    const String apiUrl = 'http://127.0.0.1:8000/api/login';
+    try {
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
@@ -104,45 +164,54 @@ class ApiService {
       );
 
       if (kDebugMode) {
-        print('Response status: ${response.statusCode}');
-      }
-      if (kDebugMode) {
-        print('Response body: ${response.body}');
-      }
+        print('Raw API response: ${response.body}');
+      } // Debug
+
+      final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        Navigator.pushReplacement(
-          context!,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
+        // Correct token access based on actual API response
+        final token = responseData['data']['access_token'];
+
+        if (token != null && token.isNotEmpty) {
+          await setToken(token);
+          return {
+            'success': true,
+            'message': responseData['message'] ?? 'Login sukses',
+            'data': {
+              'access_token': token,
+              'user': responseData['data']['user']
+            },
+          };
+        } else {
+          return {
+            'success': false,
+            'message': 'Token tidak ditemukan dalam respons'
+          };
+        }
       } else {
-        final error = jsonDecode(response.body)['message'] ?? 'Login gagal';
-        ScaffoldMessenger.of(context!).showSnackBar(
-          SnackBar(content: Text(error)),
-        );
+        final error = responseData['message'] ??
+            'Login gagal (Status: ${response.statusCode})';
+        return {'success': false, 'message': error};
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error: $e');
+        print('Login error: $e');
       }
-      ScaffoldMessenger.of(context!).showSnackBar(
-        SnackBar(content: Text('Terjadi kesalahan: $e')),
-      );
+      return {'success': false, 'message': 'Terjadi kesalahan: $e'};
     }
   }
 
-  //logout
+  // Logout dan hapus token
   Future<bool> logout() async {
+    await _loadToken();
     final response = await http.post(
       Uri.parse('$baseUrl/logout'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _headers(),
     );
 
     if (response.statusCode == 200) {
-      // Hapus token atau sesi pengguna
-      // await SharedPreferences.getInstance().then((prefs) {
-      //   prefs.remove('token');
-      // });
+      await clearToken();
       return true;
     } else {
       return false;
