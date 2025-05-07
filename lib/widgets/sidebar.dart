@@ -6,7 +6,7 @@ class Sidebar extends StatelessWidget {
   const Sidebar({super.key, required this.onNavigate});
 
   void handleNavigation(BuildContext context, String destination) {
-    Navigator.pop(context); // Menutup drawer
+    Navigator.pop(context); // Tutup drawer
     if (destination == 'logout') {
       Navigator.pushReplacementNamed(context, '/login');
     } else {
@@ -17,47 +17,77 @@ class Sidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: ListView(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(16),
+          bottomRight: Radius.circular(16),
+        ),
+      ),
+      child: Column(
         children: [
-          DrawerHeader(
-            decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-            child: const Text(
-              'Perpustakaan App',
-              style: TextStyle(color: Colors.white, fontSize: 24.0),
+          UserAccountsDrawerHeader(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blue.shade800, Colors.blueAccent],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            accountName: const Text(""),
+            accountEmail: const Text(""),
+            currentAccountPicture: const CircleAvatar(
+              backgroundImage:
+                  AssetImage('assets/profile.jpg'), // Ganti sesuai asetmu
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('Home'),
-            onTap: () => handleNavigation(context, 'home'),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text('Navigasi',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.grey)),
+                ),
+                _buildItem(context, Icons.home, 'Home', 'home'),
+                _buildItem(context, Icons.book, 'Books', 'books'),
+                _buildItem(context, Icons.people, 'Members', 'members'),
+                _buildItem(context, Icons.library_books, 'Loans', 'loans'),
+                _buildItem(
+                    context, Icons.assignment_return, 'Returns', 'returns'),
+                const Divider(),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text('Lainnya',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.grey)),
+                ),
+                _buildItem(context, Icons.logout, 'Logout', 'logout'),
+              ],
+            ),
           ),
-          ListTile(
-            leading: const Icon(Icons.book),
-            title: const Text('Books'),
-            onTap: () => handleNavigation(context, 'books'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.people),
-            title: const Text('Members'),
-            onTap: () => handleNavigation(context, 'members'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.library_books),
-            title: const Text('Loans'),
-            onTap: () => handleNavigation(context, 'loans'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.assignment_return),
-            title: const Text('Returns'),
-            onTap: () => handleNavigation(context, 'returns'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Logout'),
-            onTap: () => handleNavigation(context, 'logout'),
+          const Padding(
+            padding: EdgeInsets.all(12.0),
+            child: Text(
+              'Versi 1.0.0',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildItem(
+      BuildContext context, IconData icon, String label, String route) {
+    return ListTile(
+      leading: Icon(icon, color: Theme.of(context).primaryColor),
+      title: Text(label),
+      hoverColor: Theme.of(context).primaryColor.withOpacity(0.1),
+      onTap: () => handleNavigation(context, route),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
     );
   }
 }

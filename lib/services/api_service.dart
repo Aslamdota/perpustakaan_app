@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/member.dart'; // Import model Member
 
 class ApiService {
   final String baseUrl = 'http://127.0.0.1:8000/api';
@@ -11,43 +12,59 @@ class ApiService {
     _init();
   }
 
-  // Inisialisasi async
   Future<void> _init() async {
     await _loadToken();
   }
 
-  // Load token dari SharedPreferences
   Future<void> _loadToken() async {
     final prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token');
   }
 
-  // Simpan token ke SharedPreferences dan ke memori
   Future<void> setToken(String newToken) async {
     token = newToken;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('token', newToken);
   }
 
-  // Hapus token dari SharedPreferences
   Future<void> clearToken() async {
     token = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
+    await prefs.remove('account_name');
   }
 
-  // Ambil token dari SharedPreferences dari luar
   Future<String?> getStoredToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
   }
 
-  // Header HTTP dengan atau tanpa token
+  Future<String?> getStoredAccountName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('account_name');
+  }
+
   Map<String, String> _headers() {
     return {
       'Content-Type': 'application/json',
       if (token != null && token!.isNotEmpty) 'Authorization': 'Bearer $token',
     };
+  }
+
+  Future<List<Member>> getMembers() async {
+    await _loadToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/members'),
+      headers: _headers(),
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonData = jsonDecode(response.body)['data'];
+      // Convert JSON data to List of Member objects
+      return jsonData.map((json) => Member.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load members: ${response.body}');
+    }
   }
 
   Future<List<dynamic>> getBooks() async {
@@ -70,20 +87,6 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Error fetching books: $e');
-    }
-  }
-
-  Future<List<dynamic>> getMembers() async {
-    await _loadToken();
-    final response = await http.get(
-      Uri.parse('$baseUrl/members'),
-      headers: _headers(),
-    );
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return data['data'] ?? [];
-    } else {
-      throw Exception('Failed to load members: ${response.body}');
     }
   }
 
@@ -139,7 +142,6 @@ class ApiService {
     }
   }
 
-  // Login dan simpan token
   Future<Map<String, dynamic>> login({
     required String email,
     required String password,
@@ -154,28 +156,34 @@ class ApiService {
 
       if (kDebugMode) {
         print('Raw API response: ${response.body}');
-      } // Debug
+      }
 
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        // Correct token access based on actual API response
         final token = responseData['data']['access_token'];
+        final user = responseData['data']['user'];
+        final accountName =
+            user['account_name']; // Pastikan key ini ada di response
 
         if (token != null && token.isNotEmpty) {
           await setToken(token);
+
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('account_name', accountName ?? '');
+
           return {
             'success': true,
             'message': responseData['message'] ?? 'Login sukses',
             'data': {
               'access_token': token,
-              'user': responseData['data']['user']
+              'user': user,
             },
           };
         } else {
           return {
             'success': false,
-            'message': 'Token tidak ditemukan dalam respons'
+            'message': 'Token tidak ditemukan dalam respons',
           };
         }
       } else {
@@ -191,7 +199,6 @@ class ApiService {
     }
   }
 
-  // Logout dan hapus token
   Future<bool> logout() async {
     await _loadToken();
     final response = await http.post(
