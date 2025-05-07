@@ -18,59 +18,67 @@ class Sidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: ListView(
+      child: Column(
         children: [
+          // Header dengan logo profile
           DrawerHeader(
             decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-            child: const Text(
-              'Perpustakaan App',
-              style: TextStyle(color: Colors.white, fontSize: 24.0),
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 40.0,
+                  backgroundImage: AssetImage('assets/images/profile_placeholder.png'), // Ganti dengan path gambar profile
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Nama Pengguna',
+                  style: TextStyle(color: Colors.white, fontSize: 18.0),
+                ),
+                Text(
+                  'email@example.com',
+                  style: TextStyle(color: Colors.white70, fontSize: 14.0),
+                ),
+              ],
             ),
           ),
+          // Menu Notifikasi
           ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('Home'),
-            onTap: () => handleNavigation(context, 'home'),
+            leading: const Icon(Icons.notifications),
+            title: const Text('Notifikasi'),
+            onTap: () => handleNavigation(context, 'notifications'),
           ),
+          // Menu Tambah Peminjaman
           ListTile(
-            leading: const Icon(Icons.book),
-            title: const Text('Books'),
-            onTap: () => handleNavigation(context, 'books'),
+            leading: const Icon(Icons.add),
+            title: const Text('Tambah Peminjaman'),
+            onTap: () => handleNavigation(context, 'add_loan'),
           ),
+          // Menu Ganti Tema
           ListTile(
-            leading: const Icon(Icons.people),
-            title: const Text('Members'),
-            onTap: () => handleNavigation(context, 'members'),
+            leading: const Icon(Icons.brightness_6),
+            title: const Text('Ganti Tema'),
+            onTap: onToggleTheme,
           ),
+          // Menu Pengaturan
           ListTile(
-            leading: const Icon(Icons.library_books),
-            title: const Text('Loans'),
-            onTap: () => handleNavigation(context, 'loans'),
+            leading: const Icon(Icons.settings),
+            title: const Text('Pengaturan'),
+            onTap: () => handleNavigation(context, 'settings'),
           ),
+          const Spacer(), // Menempatkan Logout di bagian bawah
+          const Divider(), // Garis pemisah
+          // Menu Logout
           ListTile(
-            leading: const Icon(Icons.assignment_return),
-            title: const Text('Returns'),
-            onTap: () => handleNavigation(context, 'returns'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Logout'),
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: const Text(
+              'Logout',
+              style: TextStyle(color: Colors.red),
+            ),
             onTap: () => handleNavigation(context, 'logout'),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildItem(
-      BuildContext context, IconData icon, String label, String route) {
-    return ListTile(
-      leading: Icon(icon, color: Theme.of(context).primaryColor),
-      title: Text(label),
-      hoverColor: Theme.of(context).primaryColor.withOpacity(0.1),
-      onTap: () => handleNavigation(context, route),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
     );
   }
 }
