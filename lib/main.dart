@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/book_list_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/notification_screen.dart';
+import 'screens/setting_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +41,11 @@ class MyApp extends StatelessWidget {
         '/members': (context) => const MemberListScreen(),
         '/loans': (context) => const LoanListScreen(),
         '/returns': (context) => const ReturnListScreen(),
+        '/notifications': (context) => const NotificationScreen(),
+        '/settings': (context) => const SettingsScreen(),
       },
     );
   }
 }
+
+

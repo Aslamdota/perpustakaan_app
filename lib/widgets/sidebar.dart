@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class Sidebar extends StatelessWidget {
   final Function(String) onNavigate;
+  final VoidCallback onToggleTheme;
 
-  const Sidebar({super.key, required this.onNavigate});
+  const Sidebar({super.key, required this.onNavigate, required this.onToggleTheme});
 
   void handleNavigation(BuildContext context, String destination) {
     Navigator.pop(context); // Tutup drawer
@@ -17,62 +18,44 @@ class Sidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(16),
-          bottomRight: Radius.circular(16),
-        ),
-      ),
-      child: Column(
+      child: ListView(
         children: [
-          UserAccountsDrawerHeader(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue.shade800, Colors.blueAccent],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            accountName: const Text(""),
-            accountEmail: const Text(""),
-            currentAccountPicture: const CircleAvatar(
-              backgroundImage:
-                  AssetImage('assets/profile.jpg'), // Ganti sesuai asetmu
+          DrawerHeader(
+            decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+            child: const Text(
+              'Perpustakaan App',
+              style: TextStyle(color: Colors.white, fontSize: 24.0),
             ),
           ),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text('Navigasi',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.grey)),
-                ),
-                _buildItem(context, Icons.home, 'Home', 'home'),
-                _buildItem(context, Icons.book, 'Books', 'books'),
-                _buildItem(context, Icons.people, 'Members', 'members'),
-                _buildItem(context, Icons.library_books, 'Loans', 'loans'),
-                _buildItem(
-                    context, Icons.assignment_return, 'Returns', 'returns'),
-                const Divider(),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text('Lainnya',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.grey)),
-                ),
-                _buildItem(context, Icons.logout, 'Logout', 'logout'),
-              ],
-            ),
+          ListTile(
+            leading: const Icon(Icons.home),
+            title: const Text('Home'),
+            onTap: () => handleNavigation(context, 'home'),
           ),
-          const Padding(
-            padding: EdgeInsets.all(12.0),
-            child: Text(
-              'Versi 1.0.0',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
-            ),
+          ListTile(
+            leading: const Icon(Icons.book),
+            title: const Text('Books'),
+            onTap: () => handleNavigation(context, 'books'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.people),
+            title: const Text('Members'),
+            onTap: () => handleNavigation(context, 'members'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.library_books),
+            title: const Text('Loans'),
+            onTap: () => handleNavigation(context, 'loans'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.assignment_return),
+            title: const Text('Returns'),
+            onTap: () => handleNavigation(context, 'returns'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text('Logout'),
+            onTap: () => handleNavigation(context, 'logout'),
           ),
         ],
       ),
