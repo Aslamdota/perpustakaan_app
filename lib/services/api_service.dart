@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/member.dart'; // Import model Member
+
 
 class ApiService {
   final String baseUrl = 'http://127.0.0.1:8000/api';
@@ -51,19 +51,21 @@ class ApiService {
     };
   }
 
-  Future<List<Member>> getMembers() async {
-    await _loadToken();
-    final response = await http.get(
-      Uri.parse('$baseUrl/members'),
-      headers: _headers(),
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonData = jsonDecode(response.body)['data'];
-      // Convert JSON data to List of Member objects
-      return jsonData.map((json) => Member.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to load members: ${response.body}');
+  Future<List<dynamic>> getMembers() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/members'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'success' && data['data'] is List) {
+          return data['data'];
+        } else {
+          throw Exception('Invalid data format');
+        }
+      } else {
+        throw Exception('Failed to load members: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching members: $e');
     }
   }
 
@@ -202,12 +204,12 @@ class ApiService {
   Future<bool> logout() async {
     await _loadToken();
     final response = await http.post(
-      Uri.parse('$baseUrl/logout'),
+      Uri.parse('$baseUrl/logout'), // Endpoint benar
       headers: _headers(),
     );
 
     if (response.statusCode == 200) {
-      await clearToken();
+      await clearToken(); // hapus token & account name
       return true;
     } else {
       return false;

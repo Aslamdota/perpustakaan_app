@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:library_frontend/screens/loan_list_screen.dart';
 import 'package:library_frontend/screens/member_list_screen.dart';
 import 'package:library_frontend/screens/return_list_screen.dart';
+import 'package:library_frontend/screens/setting_screen.dart';
+import 'package:library_frontend/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/book_list_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/notification_screen.dart';
-import 'screens/setting_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,6 +44,21 @@ class MyApp extends StatelessWidget {
         '/returns': (context) => const ReturnListScreen(),
         '/notifications': (context) => const NotificationScreen(),
         '/settings': (context) => const SettingsScreen(),
+        'logout': (context) {
+            final apiService = ApiService();
+            apiService.logout().then((success) {
+              if (success) {
+                // ignore: use_build_context_synchronously
+                Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+              } else {
+                // ignore: use_build_context_synchronously
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Gagal logout')),
+                );
+              }
+            });
+            return const SizedBox.shrink(); // Menghindari return widget sebelum selesai
+          },
       },
     );
   }

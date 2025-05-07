@@ -9,6 +9,7 @@ class Sidebar extends StatelessWidget {
   void handleNavigation(BuildContext context, String destination) {
     Navigator.pop(context); // Tutup drawer
     if (destination == 'logout') {
+      // Arahkan langsung ke halaman login
       Navigator.pushReplacementNamed(context, '/login');
     } else {
       onNavigate(destination);
@@ -75,7 +76,7 @@ class Sidebar extends StatelessWidget {
               'Logout',
               style: TextStyle(color: Colors.red),
             ),
-            onTap: () => handleNavigation(context, 'logout'),
+            onTap: () => handleNavigation(context, 'logout'), // Pastikan ini memanggil 'logout'
           ),
         ],
       ),

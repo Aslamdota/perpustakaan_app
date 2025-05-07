@@ -24,6 +24,112 @@ class _BookListScreenState extends State<BookListScreen> {
     });
   }
 
+  void _showBookDetails(BuildContext context, Map<String, dynamic> book) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.5,
+          minChildSize: 0.3,
+          maxChildSize: 0.9,
+          builder: (context, scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 50,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Icon(Icons.book, size: 48, color: Colors.deepPurple),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          book['title'] ?? 'Tanpa Judul',
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Divider(color: Colors.grey[400]),
+                  const SizedBox(height: 12),
+                  _infoRow('Penulis', book['author']),
+                  _infoRow('Penerbit', book['publisher']),
+                  _infoRow('ISBN', book['isbn']),
+                  _infoRow('Tahun Terbit', book['publication_year']?.toString()),
+                  _infoRow('Stok Tersedia', book['stock']?.toString()),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Buku berhasil dipinjam!')),
+                        );
+                      },
+                      icon: const Icon(Icons.shopping_cart_checkout),
+                      label: const Text('Pinjam Buku'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        textStyle: const TextStyle(fontSize: 16),
+                        backgroundColor: Colors.deepPurple,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _infoRow(String label, String? value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              '$label:',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value ?? '-',
+              style: const TextStyle(color: Colors.black87),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,21 +178,8 @@ class _BookListScreenState extends State<BookListScreen> {
                   child: ListTile(
                     leading: const Icon(Icons.book, size: 40.0),
                     title: Text(book['title'] ?? 'No Title'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Author: ${book['author'] ?? 'Unknown'}'),
-                        Text('Publisher: ${book['publisher'] ?? 'Unknown'}'),
-                        Text('ISBN: ${book['isbn'] ?? 'N/A'}'),
-                        Text('Year: ${book['publication_year']?.toString() ?? 'N/A'}'),
-                        Text('Stock: ${book['stock']?.toString() ?? '0'}'),
-                      ],
-                    ),
-                    isThreeLine: true,
-                    trailing: const Icon(Icons.arrow_forward),
-                    onTap: () {
-                      // Tambahkan logika untuk detail buku jika diperlukan
-                    },
+                    subtitle: Text('Stock: ${book['stock']?.toString() ?? '0'}'),
+                    onTap: () => _showBookDetails(context, book),
                   ),
                 );
               },
