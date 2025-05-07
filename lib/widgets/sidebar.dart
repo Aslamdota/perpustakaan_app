@@ -34,27 +34,27 @@ class Sidebar extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.book),
             title: const Text('Books'),
-            onTap: () => handleNavigation(context, 'books'),
+            onTap: () => Navigator.pushNamed(context, '/books'),
           ),
           ListTile(
             leading: const Icon(Icons.people),
             title: const Text('Members'),
-            onTap: () => handleNavigation(context, 'members'),
+            onTap: () => Navigator.pushNamed(context, '/members'),
           ),
           ListTile(
             leading: const Icon(Icons.library_books),
             title: const Text('Loans'),
-            onTap: () => handleNavigation(context, 'loans'),
+            onTap: () => Navigator.pushNamed(context, '/loans'),
           ),
           ListTile(
             leading: const Icon(Icons.assignment_return),
             title: const Text('Returns'),
-            onTap: () => handleNavigation(context, 'returns'),
+            onTap: () => Navigator.pushNamed(context, '/returns'),
           ),
           ListTile(
             leading: const Icon(Icons.logout),
             title: const Text('Logout'),
-            onTap: () => handleNavigation(context, 'logout'),
+            onTap: () => Navigator.pushNamed(context, '/logout'),
           ),
         ],
       ),
