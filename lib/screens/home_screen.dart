@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'book_list_screen.dart';
 import 'member_list_screen.dart';
 import 'loan_list_screen.dart';
+import 'profile_screen.dart';
 import 'return_list_screen.dart';
-import '../widgets/sidebar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const MemberListScreen(),
     const LoanListScreen(),
     const ReturnListScreen(),
-    const Center(child: Text('Profile')), // Placeholder untuk Profile
+    const ProfileScreen(), // Tab Profile
   ];
 
   void toggleTheme() {
@@ -30,15 +30,6 @@ class _HomeScreenState extends State<HomeScreen> {
       currentTheme =
           currentTheme == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
     });
-  }
-
-  void handleSidebarNavigation(String destination) {
-    if (destination == 'logout') {
-      Navigator.pushReplacementNamed(context, '/login');
-    } else if (destination == 'settings') {
-      Navigator.pushNamed(context, '/settings');
-    }
-    // Tambahkan navigasi lainnya jika diperlukan
   }
 
   @override
@@ -50,22 +41,22 @@ class _HomeScreenState extends State<HomeScreen> {
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Perpustakaan App'),
-          leading: Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () => Scaffold.of(context).openDrawer(),
-            ),
-          ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.brightness_6),
+              icon: const Icon(Icons.notifications),
+              onPressed: () {
+                Navigator.pushNamed(context, '/notifications');
+              },
+            ),
+            IconButton(
+              icon: Icon(
+                currentTheme == ThemeMode.light
+                    ? Icons.nightlight_round // Ikon bulan untuk mode gelap
+                    : Icons.wb_sunny, // Ikon matahari untuk mode terang
+              ),
               onPressed: toggleTheme,
             ),
           ],
-        ),
-        drawer: Sidebar(
-          onNavigate: handleSidebarNavigation,
-          onToggleTheme: toggleTheme,
         ),
         body: _screens[_currentIndex], // Tampilkan layar sesuai tab yang dipilih
         bottomNavigationBar: BottomNavigationBar(
