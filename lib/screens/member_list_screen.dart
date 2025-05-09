@@ -42,6 +42,8 @@ class _MemberListScreenState extends State<MemberListScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
+            // Tambahkan log untuk memeriksa error
+            print('Error: ${snapshot.error}');
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

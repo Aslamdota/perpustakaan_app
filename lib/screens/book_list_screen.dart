@@ -97,7 +97,7 @@ class _BookListScreenState extends State<BookListScreen> {
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         textStyle: const TextStyle(fontSize: 16),
-                        backgroundColor: const Color.fromARGB(255, 186, 146, 255),
+                        backgroundColor: const Color.fromARGB(255, 170, 140, 223),
                       ),
                     ),
                   ),
