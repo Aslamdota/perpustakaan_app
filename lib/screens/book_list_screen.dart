@@ -37,8 +37,8 @@ class _BookListScreenState extends State<BookListScreen> {
       builder: (context) {
         return DraggableScrollableSheet(
           expand: false,
-          initialChildSize: 0.5,
-          minChildSize: 0.3,
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
           maxChildSize: 0.9,
           builder: (context, scrollController) {
             return SingleChildScrollView(
