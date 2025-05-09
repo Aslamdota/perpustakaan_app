@@ -100,8 +100,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 32),
                 buildIconRow(Icons.person, 'Nama Pengguna', userName),
-                buildIconRow(Icons.info, 'Tentang', 'Ini adalah halaman profil Anda'),
                 buildIconRow(Icons.phone, 'Telepon', 'Belum tersedia'),
+                buildIconRow(Icons.info, 'Tentang', 'Ini adalah halaman profil Anda'),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
                   onPressed: _logout,

@@ -131,6 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 32),
                       TextField(
                         controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           labelText: 'Email',
                           prefixIcon: const Icon(Icons.email),
