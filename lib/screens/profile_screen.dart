@@ -11,6 +11,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   String userEmail = 'Memuat...';
+  String userName = 'Memuat...';
 
   @override
   void initState() {
@@ -22,6 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       userEmail = prefs.getString('email') ?? 'Tidak diketahui';
+      userName = prefs.getString('name') ?? 'Tidak diketahui';
     });
   }
 
@@ -60,6 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
+  
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final maxContentWidth = screenWidth > 600 ? 500.0 : double.infinity;
@@ -96,7 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                buildIconRow(Icons.person, 'Nama Pengguna', 'Belum tersedia'),
+                buildIconRow(Icons.person, 'Nama Pengguna', userName),
                 buildIconRow(Icons.info, 'Tentang', 'Ini adalah halaman profil Anda'),
                 buildIconRow(Icons.phone, 'Telepon', 'Belum tersedia'),
                 const SizedBox(height: 24),

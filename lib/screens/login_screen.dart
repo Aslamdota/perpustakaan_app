@@ -32,10 +32,10 @@ class _LoginScreenState extends State<LoginScreen> {
       if (result['success']) {
         final token = result['data']['access_token'];
        if (token != null && token.isNotEmpty) {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setString('token', token);
-  await prefs.setString('email', email); // ✅ Tambahkan baris ini di sini
-
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('token', token);
+          await prefs.setString('email', email); // ✅ Tambahkan baris ini di sini
+          await prefs.setString('name', result['data']['user']['name']);
 
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
