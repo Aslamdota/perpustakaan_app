@@ -5,6 +5,7 @@ import 'package:library_frontend/screens/home_screen.dart';
 import 'package:library_frontend/screens/register_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -30,9 +31,11 @@ class _LoginScreenState extends State<LoginScreen> {
       final result = await apiService.login(email: email, password: password);
       if (result['success']) {
         final token = result['data']['access_token'];
-        if (token != null && token.isNotEmpty) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('token', token);
+       if (token != null && token.isNotEmpty) {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('token', token);
+  await prefs.setString('email', email); // ✅ Tambahkan baris ini di sini
+
 
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
