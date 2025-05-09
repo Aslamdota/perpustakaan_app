@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:library_frontend/services/api_service.dart';
 import 'package:library_frontend/screens/home_screen.dart';
@@ -28,8 +28,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final result = await apiService.login(email: email, password: password);
-      if (kDebugMode) print('API Response: $result');
-
       if (result['success']) {
         final token = result['data']['access_token'];
         if (token != null && token.isNotEmpty) {
@@ -102,7 +100,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 elevation: 10,
-                // ignore: deprecated_member_use
                 color: Colors.white.withOpacity(0.95),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -168,24 +165,36 @@ class _LoginScreenState extends State<LoginScreen> {
                                 onPressed: _handleLogin,
                                 child: const Text(
                                   'Masuk',
-                                  style: TextStyle(fontSize: 16),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white, // Ubah warna teks menjadi putih
+                                  ),
                                 ),
                               ),
                             ),
                       const SizedBox(height: 16),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const RegisterScreen()),
-                          );
-                        },
-                        child: const Text(
-                          'Belum punya akun? Daftar',
-                          style: TextStyle(
-                            color: Color(0xFF2575FC),
-                          ),
+                      RichText(
+                        text: TextSpan(
+                          text: 'Belum punya akun? ',
+                          style: const TextStyle(color: Colors.grey),
+                          children: [
+                            TextSpan(
+                              text: 'Daftar',
+                              style: const TextStyle(
+                                color: Color(0xFF2575FC),
+                                fontWeight: FontWeight.bold,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const RegisterScreen(),
+                                    ),
+                                  );
+                                },
+                            ),
+                          ],
                         ),
                       ),
                     ],

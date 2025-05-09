@@ -25,6 +25,9 @@ class _BookListScreenState extends State<BookListScreen> {
   }
 
   void _showBookDetails(BuildContext context, Map<String, dynamic> book) {
+    final theme = Theme.of(context); // Ambil tema saat ini
+    final textColor = theme.textTheme.bodyLarge?.color ?? Colors.black;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -49,7 +52,7 @@ class _BookListScreenState extends State<BookListScreen> {
                       width: 50,
                       height: 5,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: theme.dividerColor, // Warna sesuai tema
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
@@ -62,22 +65,23 @@ class _BookListScreenState extends State<BookListScreen> {
                       Expanded(
                         child: Text(
                           book['title'] ?? 'Tanpa Judul',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
+                            color: textColor, // Warna teks sesuai tema
                           ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Divider(color: Colors.grey[400]),
+                  Divider(color: theme.dividerColor), // Divider sesuai tema
                   const SizedBox(height: 12),
-                  _infoRow('Penulis', book['author']),
-                  _infoRow('Penerbit', book['publisher']),
-                  _infoRow('ISBN', book['isbn']),
-                  _infoRow('Tahun Terbit', book['publication_year']?.toString()),
-                  _infoRow('Stok Tersedia', book['stock']?.toString()),
+                  _infoRow('Penulis', book['author'], textColor),
+                  _infoRow('Penerbit', book['publisher'], textColor),
+                  _infoRow('ISBN', book['isbn'], textColor),
+                  _infoRow('Tahun Terbit', book['publication_year']?.toString(), textColor),
+                  _infoRow('Stok Tersedia', book['stock']?.toString(), textColor),
                   const SizedBox(height: 24),
                   SizedBox(
                     width: double.infinity,
@@ -93,7 +97,7 @@ class _BookListScreenState extends State<BookListScreen> {
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         textStyle: const TextStyle(fontSize: 16),
-                        backgroundColor: Colors.deepPurple,
+                        backgroundColor: const Color.fromARGB(255, 186, 146, 255),
                       ),
                     ),
                   ),
@@ -106,7 +110,7 @@ class _BookListScreenState extends State<BookListScreen> {
     );
   }
 
-  Widget _infoRow(String label, String? value) {
+  Widget _infoRow(String label, String? value, Color textColor) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
@@ -116,13 +120,13 @@ class _BookListScreenState extends State<BookListScreen> {
             width: 120,
             child: Text(
               '$label:',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.bold, color: textColor),
             ),
           ),
           Expanded(
             child: Text(
               value ?? '-',
-              style: const TextStyle(color: Colors.black87),
+              style: TextStyle(color: textColor),
             ),
           ),
         ],
