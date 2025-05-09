@@ -53,16 +53,21 @@ class ApiService {
 
   Future<List<dynamic>> getMembers() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/members'));
+      await _loadToken(); // pastikan token dimuat
+      final response = await http.get(
+        Uri.parse('$baseUrl/members'),
+        headers: _headers(),
+      );
+
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['status'] == 'success' && data['data'] is List) {
-          return data['data'];
+        final data = jsonDecode(response.body);
+        if (data is List) {
+          return data; // langsung return list
         } else {
-          throw Exception('Invalid data format');
+          throw Exception('Unexpected data format: not a list');
         }
       } else {
-        throw Exception('Failed to load members: ${response.statusCode}');
+        throw Exception('Failed to fetch members: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Error fetching members: $e');

@@ -43,17 +43,25 @@ class _LoanListScreenState extends State<LoanListScreen> {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Gagal memuat data peminjaman'),
-                  Text(snapshot.error.toString()),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _loadLoans,
-                    child: const Text('Coba Lagi'),
-                  ),
-                ],
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Gagal memuat data peminjaman'),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        snapshot.error.toString(),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _loadLoans,
+                      child: const Text('Coba Lagi'),
+                    ),
+                  ],
+                ),
               ),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
