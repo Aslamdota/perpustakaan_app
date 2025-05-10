@@ -25,7 +25,7 @@ class _BookListScreenState extends State<BookListScreen> {
   }
 
   void _showBookDetails(BuildContext context, Map<String, dynamic> book) {
-    final theme = Theme.of(context); // Ambil tema saat ini
+    final theme = Theme.of(context);
     final textColor = theme.textTheme.bodyLarge?.color ?? Colors.black;
 
     showModalBottomSheet(
@@ -52,7 +52,7 @@ class _BookListScreenState extends State<BookListScreen> {
                       width: 50,
                       height: 5,
                       decoration: BoxDecoration(
-                        color: theme.dividerColor, // Warna sesuai tema
+                        color: theme.dividerColor,
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
@@ -60,7 +60,8 @@ class _BookListScreenState extends State<BookListScreen> {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      const Icon(Icons.book, size: 48, color: Colors.deepPurple),
+                      const Icon(Icons.book,
+                          size: 48, color: Colors.deepPurple),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -68,20 +69,22 @@ class _BookListScreenState extends State<BookListScreen> {
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: textColor, // Warna teks sesuai tema
+                            color: textColor,
                           ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Divider(color: theme.dividerColor), // Divider sesuai tema
+                  Divider(color: theme.dividerColor),
                   const SizedBox(height: 12),
                   _infoRow('Penulis', book['author'], textColor),
                   _infoRow('Penerbit', book['publisher'], textColor),
                   _infoRow('ISBN', book['isbn'], textColor),
-                  _infoRow('Tahun Terbit', book['publication_year']?.toString(), textColor),
-                  _infoRow('Stok Tersedia', book['stock']?.toString(), textColor),
+                  _infoRow('Tahun Terbit', book['publication_year']?.toString(),
+                      textColor),
+                  _infoRow(
+                      'Stok Tersedia', book['stock']?.toString(), textColor),
                   const SizedBox(height: 24),
                   SizedBox(
                     width: double.infinity,
@@ -89,7 +92,8 @@ class _BookListScreenState extends State<BookListScreen> {
                       onPressed: () {
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Buku berhasil dipinjam!')),
+                          const SnackBar(
+                              content: Text('Buku berhasil dipinjam!')),
                         );
                       },
                       icon: const Icon(Icons.shopping_cart_checkout),
@@ -97,7 +101,8 @@ class _BookListScreenState extends State<BookListScreen> {
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         textStyle: const TextStyle(fontSize: 16),
-                        backgroundColor: const Color.fromARGB(255, 170, 140, 223),
+                        backgroundColor:
+                            const Color.fromARGB(255, 170, 140, 223),
                       ),
                     ),
                   ),
@@ -172,21 +177,50 @@ class _BookListScreenState extends State<BookListScreen> {
             );
           } else {
             final books = snapshot.data!;
-            return ListView.builder(
+            final favoriteBooks =
+                books.where((book) => book['is_favorite'] == true).toList();
+            final otherBooks =
+                books.where((book) => book['is_favorite'] != true).toList();
+
+            return ListView(
               padding: const EdgeInsets.all(16.0),
-              itemCount: books.length,
-              itemBuilder: (context, index) {
-                final book = books[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: ListTile(
-                    leading: const Icon(Icons.book, size: 40.0),
-                    title: Text(book['title'] ?? 'No Title'),
-                    subtitle: Text('Stock: ${book['stock']?.toString() ?? '0'}'),
-                    onTap: () => _showBookDetails(context, book),
+              children: [
+                if (favoriteBooks.isNotEmpty) ...[
+                  const Text(
+                    'Buku Favorit',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                );
-              },
+                  const SizedBox(height: 8),
+                  ...favoriteBooks.map((book) => Card(
+                        color: const Color.fromARGB(255, 255, 248, 225),
+                        margin: const EdgeInsets.symmetric(vertical: 6.0),
+                        child: ListTile(
+                          leading:
+                              const Icon(Icons.favorite, color: Colors.red),
+                          title: Text(book['title'] ?? 'No Title'),
+                          subtitle: Text(
+                              'Stock: ${book['stock']?.toString() ?? '0'}'),
+                          onTap: () => _showBookDetails(context, book),
+                        ),
+                      )),
+                  const Divider(height: 32),
+                ],
+                const Text(
+                  'Semua Buku',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                ...otherBooks.map((book) => Card(
+                      margin: const EdgeInsets.symmetric(vertical: 6.0),
+                      child: ListTile(
+                        leading: const Icon(Icons.book),
+                        title: Text(book['title'] ?? 'No Title'),
+                        subtitle:
+                            Text('Stock: ${book['stock']?.toString() ?? '0'}'),
+                        onTap: () => _showBookDetails(context, book),
+                      ),
+                    )),
+              ],
             );
           }
         },

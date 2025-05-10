@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class ApiService {
   final String baseUrl = 'http://127.0.0.1:8000/api';
   String? token;
@@ -94,6 +93,26 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Error fetching books: $e');
+    }
+  }
+
+//  method getFavoriteBooks
+  Future<List<dynamic>> getFavoriteBooks(String memberId) async {
+    await _loadToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/recomendation/$memberId'),
+      headers: _headers(),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['status'] == 'success') {
+        return data['data'] ?? [];
+      } else {
+        throw Exception('API error: ${data['message']}');
+      }
+    } else {
+      throw Exception('Failed to load favorite books: ${response.statusCode}');
     }
   }
 
