@@ -116,6 +116,26 @@ class ApiService {
     }
   }
 
+  Future<List<dynamic>> getLatestBooks() async {
+    await _loadToken(); // Pastikan token dimuat
+    final url = Uri.parse('$baseUrl/books/latest');
+    final response = await http.get(
+      url,
+      headers: _headers(), // Gunakan header dengan token
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data is List && data.isNotEmpty) {
+        return data; // Jika ada buku terbaru, kembalikan data tersebut
+      } else {
+        return []; // Jika tidak ada buku terbaru, kembalikan list kosong
+      }
+    } else {
+      throw Exception('Gagal memuat buku terbaru: ${response.body}');
+    }
+  }
+
   Future<List<dynamic>> getLoans() async {
     await _loadToken();
     final response = await http.get(
@@ -170,6 +190,23 @@ class ApiService {
       throw Exception('Failed to create return: ${response.body}');
     }
   }
+
+  Future<List<dynamic>> getCategories() async {
+    await _loadToken(); // Pastikan token dimuat
+    final url = Uri.parse('$baseUrl/categories');
+    final response = await http.get(
+      url,
+      headers: _headers(),
+    );
+
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(response.body);
+      return decoded['data']; // Ambil hanya bagian 'data'
+    } else {
+      throw Exception('Gagal memuat kategori: ${response.body}');
+    }
+  }
+
 
   Future<Map<String, dynamic>> login({
     required String email,

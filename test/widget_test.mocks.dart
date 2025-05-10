@@ -32,13 +32,13 @@ class MockApiService extends _i1.Mock implements _i2.ApiService {
   }
 
   @override
-  _i3.Future<List<_i4.Book>> getBooks() => (super.noSuchMethod(
+  _i3.Future<List<dynamic>> getBooks() => (super.noSuchMethod(
         Invocation.method(
           #getBooks,
           [],
         ),
-        returnValue: _i3.Future<List<_i4.Book>>.value(<_i4.Book>[]),
-      ) as _i3.Future<List<_i4.Book>>);
+        returnValue: _i3.Future<List<dynamic>>.value(<dynamic>[]),
+      ) as _i3.Future<List<dynamic>>);
 
   _i3.Future<void> addBook(_i4.Book? book) => (super.noSuchMethod(
         Invocation.method(

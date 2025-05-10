@@ -90,27 +90,27 @@ class _BookListScreenState extends State<BookListScreen> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: () async {
-                        Navigator.pop(context);
-                        try {
-                          final response = await apiService.createLoan(book['id']);
-                          if (response['success'] == true) {
-                            // ignore: use_build_context_synchronously
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Permintaan peminjaman dikirim')),
-                            );
-                          } else {
-                            // ignore: use_build_context_synchronously
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Gagal meminjam buku')),
-                            );
-                          }
-                        } catch (e) {
+                      Navigator.pop(context);
+                      try {
+                        final response = await apiService.createLoan(book['id']);
+                        if (response['success'] == true) {
                           // ignore: use_build_context_synchronously
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error: $e')),
+                            const SnackBar(content: Text('Permintaan peminjaman dikirim')),
+                          );
+                        } else {
+                          // ignore: use_build_context_synchronously
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Gagal meminjam buku')),
                           );
                         }
-                      },
+                      } catch (e) {
+                        // ignore: use_build_context_synchronously
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error: $e')),
+                        );
+                      }
+                    },
                       icon: const Icon(Icons.shopping_cart_checkout),
                       label: const Text('Pinjam Buku'),
                       style: ElevatedButton.styleFrom(

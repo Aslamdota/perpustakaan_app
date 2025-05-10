@@ -12,7 +12,6 @@ import 'screens/notification_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Check if the user is logged in by checking for a stored token
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('token');
 
@@ -35,6 +34,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: isLoggedIn ? '/home' : '/login',
       routes: {
+        '/': (context) => const HomeScreen(), // Tambahan root route
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),
         '/books': (context) => const BookListScreen(),

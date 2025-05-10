@@ -3,7 +3,7 @@ import 'book_list_screen.dart';
 import 'member_list_screen.dart';
 import 'loan_list_screen.dart';
 import 'profile_screen.dart';
-import 'return_list_screen.dart';
+import '../widgets/home_content.dart'; // Import widget konten utama
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,16 +13,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0; // Index untuk Bottom Navigation Bar
+  int _currentIndex = 0;
   ThemeMode currentTheme = ThemeMode.light;
 
-  // Daftar layar untuk setiap tab
   final List<Widget> _screens = [
+    const HomeContent(), // Konten utama dipindahkan ke widget terpisah
     const BookListScreen(),
     const MemberListScreen(),
     const LoanListScreen(),
-    const ReturnListScreen(),
-    const ProfileScreen(), // Tab Profile
+    const ProfileScreen(),
   ];
 
   void toggleTheme() {
@@ -51,14 +50,14 @@ class _HomeScreenState extends State<HomeScreen> {
             IconButton(
               icon: Icon(
                 currentTheme == ThemeMode.light
-                    ? Icons.nightlight_round // Ikon bulan untuk mode gelap
-                    : Icons.wb_sunny, // Ikon matahari untuk mode terang
+                    ? Icons.nightlight_round
+                    : Icons.wb_sunny,
               ),
               onPressed: toggleTheme,
             ),
           ],
         ),
-        body: _screens[_currentIndex], // Tampilkan layar sesuai tab yang dipilih
+        body: _screens[_currentIndex],
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,
           onTap: (index) {
@@ -69,24 +68,24 @@ class _HomeScreenState extends State<HomeScreen> {
           type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.book),
-              label: 'Books',
+              icon: Icon(Icons.home),
+              label: 'Beranda',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.menu_book),
+              label: 'Buku',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.people),
-              label: 'Members',
+              label: 'Anggota',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.library_books),
-              label: 'Loans',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.assignment_return),
-              label: 'Returns',
+              label: 'Pinjaman',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),
-              label: 'Profile',
+              label: 'Profil',
             ),
           ],
         ),
