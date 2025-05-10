@@ -138,15 +138,54 @@ class ApiService {
 
   Future<List<dynamic>> getLoans() async {
     await _loadToken();
+    final url = Uri.parse('$baseUrl/loans');
     final response = await http.get(
-      Uri.parse('$baseUrl/loans'),
+      url,
       headers: _headers(),
     );
+
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return data['data'] ?? [];
+      return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to load loans: ${response.body}');
+      throw Exception('Gagal memuat daftar peminjaman: ${response.body}');
+    }
+  }
+
+  Future<void> borrowBook(int bookId, int memberId) async {
+    final response = await http.post(
+      Uri.parse('http://localhost:8000/api/borrowings'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'book_id': bookId,
+        'member_id': memberId,
+        'borrow_date': DateTime.now().toIso8601String(),
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      if (kDebugMode) {
+        print('Peminjaman berhasil diajukan');
+      }
+    } else {
+      if (kDebugMode) {
+        print('Gagal: ${response.body}');
+      }
+    }
+  }
+  
+  Future<void> returnBook(int borrowingId) async {
+    final response = await http.put(
+      Uri.parse('http://localhost:8000/api/borrowings/$borrowingId/return'),
+    );
+
+    if (response.statusCode == 200) {
+      if (kDebugMode) {
+        print('Buku berhasil dikembalikan');
+      }
+    } else {
+      if (kDebugMode) {
+        print('Gagal mengembalikan buku: ${response.body}');
+      }
     }
   }
 
@@ -165,17 +204,18 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> createLoan(int bookId) async {
+    await _loadToken();
     final url = Uri.parse('$baseUrl/loans');
     final response = await http.post(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: _headers(),
       body: jsonEncode({'book_id': bookId}),
     );
 
     if (response.statusCode == 201) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Gagal membuat peminjaman');
+      throw Exception('Gagal membuat peminjaman: ${response.body}');
     }
   }
 

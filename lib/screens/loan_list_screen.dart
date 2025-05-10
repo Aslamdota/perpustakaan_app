@@ -11,6 +11,7 @@ class LoanListScreen extends StatefulWidget {
 
 class _LoanListScreenState extends State<LoanListScreen> {
   final ApiService apiService = ApiService();
+  late Future<List<dynamic>> _loansFuture;
 
   @override
   void initState() {
@@ -20,6 +21,7 @@ class _LoanListScreenState extends State<LoanListScreen> {
 
   void _loadLoans() {
     setState(() {
+      _loansFuture = apiService.getLoans();
     });
   }
 
@@ -28,15 +30,32 @@ class _LoanListScreenState extends State<LoanListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Daftar Peminjaman'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadLoans,
+          ),
+        ],
       ),
       body: FutureBuilder<List<dynamic>>(
-        future: apiService.getLoans(),
+        future: _loansFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(
-              child: Text('Error: ${snapshot.error}'),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Gagal memuat data peminjaman'),
+                  Text(snapshot.error.toString()),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _loadLoans,
+                    child: const Text('Coba Lagi'),
+                  ),
+                ],
+              ),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
@@ -58,7 +77,7 @@ class _LoanListScreenState extends State<LoanListScreen> {
                     trailing: loan['status'] == 'Approved'
                         ? ElevatedButton(
                             onPressed: () {
-                              // Navigasi ke halaman ambil buku
+                              // Navigasi ke halaman pengambilan buku
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
