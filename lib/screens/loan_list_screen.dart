@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import 'pickup_screen.dart';
 
 class LoanListScreen extends StatefulWidget {
   const LoanListScreen({super.key});
@@ -10,7 +11,6 @@ class LoanListScreen extends StatefulWidget {
 
 class _LoanListScreenState extends State<LoanListScreen> {
   final ApiService apiService = ApiService();
-  late Future<List<dynamic>> _loansFuture;
 
   @override
   void initState() {
@@ -20,7 +20,6 @@ class _LoanListScreenState extends State<LoanListScreen> {
 
   void _loadLoans() {
     setState(() {
-      _loansFuture = apiService.getLoans();
     });
   }
 
@@ -29,40 +28,15 @@ class _LoanListScreenState extends State<LoanListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Daftar Peminjaman'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadLoans,
-          ),
-        ],
       ),
       body: FutureBuilder<List<dynamic>>(
-        future: _loansFuture,
+        future: apiService.getLoans(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Gagal memuat data peminjaman'),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        snapshot.error.toString(),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _loadLoans,
-                      child: const Text('Coba Lagi'),
-                    ),
-                  ],
-                ),
-              ),
+              child: Text('Error: ${snapshot.error}'),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
@@ -78,10 +52,23 @@ class _LoanListScreenState extends State<LoanListScreen> {
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 8.0),
                   child: ListTile(
-                    leading: const Icon(Icons.library_books, size: 40.0),
+                    leading: const Icon(Icons.library_books),
                     title: Text(loan['book_title'] ?? 'No Title'),
-                    subtitle: Text('Dipinjam oleh: ${loan['member_name'] ?? 'Unknown'}'),
-                    trailing: Text('Tanggal: ${loan['loan_date'] ?? 'N/A'}'),
+                    subtitle: Text('Status: ${loan['status']}'),
+                    trailing: loan['status'] == 'Approved'
+                        ? ElevatedButton(
+                            onPressed: () {
+                              // Navigasi ke halaman ambil buku
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => PickupScreen(loanId: loan['id']),
+                                ),
+                              );
+                            },
+                            child: const Text('Ambil Buku'),
+                          )
+                        : null,
                   ),
                 );
               },

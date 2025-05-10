@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
@@ -43,7 +44,9 @@ class _MemberListScreenState extends State<MemberListScreen> {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             // Tambahkan log untuk memeriksa error
-            print('Error: ${snapshot.error}');
+            if (kDebugMode) {
+              print('Error: ${snapshot.error}');
+            }
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

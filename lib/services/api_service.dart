@@ -144,15 +144,18 @@ class ApiService {
     }
   }
 
-  Future<void> createLoan(Map<String, dynamic> loanData) async {
-    await _loadToken();
+  Future<Map<String, dynamic>> createLoan(int bookId) async {
+    final url = Uri.parse('$baseUrl/loans');
     final response = await http.post(
-      Uri.parse('$baseUrl/loans'),
-      headers: _headers(),
-      body: json.encode(loanData),
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'book_id': bookId}),
     );
-    if (response.statusCode != 201) {
-      throw Exception('Failed to create loan: ${response.body}');
+
+    if (response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Gagal membuat peminjaman');
     }
   }
 

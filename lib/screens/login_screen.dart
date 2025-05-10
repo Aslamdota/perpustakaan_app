@@ -129,6 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   borderRadius: BorderRadius.circular(30),
                 ),
                 elevation: 12,
+                // ignore: deprecated_member_use
                 color: Colors.white.withOpacity(0.95),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -195,7 +196,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               isPasswordVisible
                                   ? Icons.visibility
                                   : Icons.visibility_off,
-                              color: Color(0xFF8F94FB),
+                              color: const Color(0xFF8F94FB),
                             ),
                             onPressed: () {
                               setState(() {

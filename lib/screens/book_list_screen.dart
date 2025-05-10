@@ -89,12 +89,27 @@ class _BookListScreenState extends State<BookListScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: () {
+                      onPressed: () async {
                         Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Buku berhasil dipinjam!')),
-                        );
+                        try {
+                          final response = await apiService.createLoan(book['id']);
+                          if (response['success'] == true) {
+                            // ignore: use_build_context_synchronously
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Permintaan peminjaman dikirim')),
+                            );
+                          } else {
+                            // ignore: use_build_context_synchronously
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Gagal meminjam buku')),
+                            );
+                          }
+                        } catch (e) {
+                          // ignore: use_build_context_synchronously
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error: $e')),
+                          );
+                        }
                       },
                       icon: const Icon(Icons.shopping_cart_checkout),
                       label: const Text('Pinjam Buku'),
