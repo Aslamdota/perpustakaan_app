@@ -30,7 +30,7 @@ class ApiService {
     token = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
-    await prefs.remove('account_name');
+    await prefs.remove('member_name');
   }
 
   Future<String?> getStoredToken() async {
@@ -38,9 +38,9 @@ class ApiService {
     return prefs.getString('token');
   }
 
-  Future<String?> getStoredAccountName() async {
+  Future<String?> getStoredMemberName() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('account_name');
+    return prefs.getString('member_name');
   }
 
   Map<String, String> _headers() {
@@ -96,7 +96,6 @@ class ApiService {
     }
   }
 
-//  method getFavoriteBooks
   Future<List<dynamic>> getFavoriteBooks(String memberId) async {
     await _loadToken();
     final response = await http.get(
@@ -119,73 +118,132 @@ class ApiService {
   Future<List<dynamic>> getLatestBooks() async {
     await _loadToken(); // Pastikan token dimuat
     final url = Uri.parse('$baseUrl/books/latest');
-    final response = await http.get(
-      url,
-      headers: _headers(), // Gunakan header dengan token
-    );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data is List && data.isNotEmpty) {
-        return data; // Jika ada buku terbaru, kembalikan data tersebut
-      } else {
-        return []; // Jika tidak ada buku terbaru, kembalikan list kosong
+    try {
+      final response = await http.get(
+        url,
+        headers: _headers(),
+      );
+
+      if (kDebugMode) {
+        print('Request URL: $url');
+        print('Request Headers: ${_headers()}');
+        print('Raw API response: ${response.body}');
       }
-    } else {
-      throw Exception('Gagal memuat buku terbaru: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success') {
+          return data['data'] ?? [];
+        } else {
+          throw Exception('API Error: ${data['message']}');
+        }
+      } else {
+        throw Exception('Gagal memuat buku terbaru: ${response.body}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching latest books: $e');
+      }
+      throw Exception('Error fetching latest books: $e');
     }
   }
 
   Future<List<dynamic>> getLoans() async {
-    await _loadToken();
+    await _loadToken(); // Pastikan token dimuat
     final url = Uri.parse('$baseUrl/loans');
-    final response = await http.get(
-      url,
-      headers: _headers(),
-    );
-
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Gagal memuat daftar peminjaman: ${response.body}');
+  
+    try {
+      final response = await http.get(
+        url,
+        headers: _headers(),
+      );
+  
+      if (kDebugMode) {
+        print('Request URL: $url');
+        print('Request Headers: ${_headers()}');
+        print('Raw API response: ${response.body}');
+      }
+  
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success') {
+          return data['data'] ?? [];
+        } else {
+          throw Exception('API Error: ${data['message']}');
+        }
+      } else {
+        throw Exception('Gagal memuat daftar peminjaman: ${response.body}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching loans: $e');
+      }
+      throw Exception('Error fetching loans: $e');
     }
   }
 
   Future<void> borrowBook(int bookId, int memberId) async {
-    final response = await http.post(
-      Uri.parse('http://localhost:8000/api/borrowings'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'book_id': bookId,
-        'member_id': memberId,
-        'borrow_date': DateTime.now().toIso8601String(),
-      }),
-    );
-
-    if (response.statusCode == 200) {
+    await _loadToken(); // Pastikan token dimuat
+    final url = Uri.parse('$baseUrl/borrowings');
+  
+    try {
+      final response = await http.post(
+        url,
+        headers: _headers(),
+        body: jsonEncode({
+          'book_id': bookId,
+          'member_id': memberId,
+          'borrow_date': DateTime.now().toIso8601String(),
+        }),
+      );
+  
       if (kDebugMode) {
-        print('Peminjaman berhasil diajukan');
+        print('Request URL: $url');
+        print('Request Headers: ${_headers()}');
+        print('Request Body: ${jsonEncode({
+          'book_id': bookId,
+          'member_id': memberId,
+          'borrow_date': DateTime.now().toIso8601String(),
+        })}');
+        print('Raw API response: ${response.body}');
       }
-    } else {
+  
+      if (response.statusCode != 200) {
+        throw Exception('Gagal meminjam buku: ${response.body}');
+      }
+    } catch (e) {
       if (kDebugMode) {
-        print('Gagal: ${response.body}');
+        print('Error borrowing book: $e');
       }
+      throw Exception('Error borrowing book: $e');
     }
   }
-  
-  Future<void> returnBook(int borrowingId) async {
-    final response = await http.put(
-      Uri.parse('http://localhost:8000/api/borrowings/$borrowingId/return'),
-    );
 
-    if (response.statusCode == 200) {
+  Future<void> returnBook(int borrowingId) async {
+    await _loadToken(); // Pastikan token dimuat
+    final url = Uri.parse('$baseUrl/borrowings/$borrowingId/return');
+  
+    try {
+      final response = await http.put(
+        url,
+        headers: _headers(),
+      );
+  
       if (kDebugMode) {
-        print('Buku berhasil dikembalikan');
+        print('Request URL: $url');
+        print('Request Headers: ${_headers()}');
+        print('Raw API response: ${response.body}');
       }
-    } else {
+  
+      if (response.statusCode != 200) {
+        throw Exception('Gagal mengembalikan buku: ${response.body}');
+      }
+    } catch (e) {
       if (kDebugMode) {
-        print('Gagal mengembalikan buku: ${response.body}');
+        print('Error returning book: $e');
       }
+      throw Exception('Error returning book: $e');
     }
   }
 
@@ -234,19 +292,36 @@ class ApiService {
   Future<List<dynamic>> getCategories() async {
     await _loadToken(); // Pastikan token dimuat
     final url = Uri.parse('$baseUrl/categories');
-    final response = await http.get(
-      url,
-      headers: _headers(),
-    );
 
-    if (response.statusCode == 200) {
-      final decoded = jsonDecode(response.body);
-      return decoded['data']; // Ambil hanya bagian 'data'
-    } else {
-      throw Exception('Gagal memuat kategori: ${response.body}');
+    try {
+      final response = await http.get(
+        url,
+        headers: _headers(),
+      );
+
+      if (kDebugMode) {
+        print('Request URL: $url');
+        print('Request Headers: ${_headers()}');
+        print('Raw API response: ${response.body}');
+      }
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success') {
+          return data['data'] ?? [];
+        } else {
+          throw Exception('API Error: ${data['message']}');
+        }
+      } else {
+        throw Exception('Gagal memuat kategori: ${response.body}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching categories: $e');
+      }
+      throw Exception('Error fetching categories: $e');
     }
   }
-
 
   Future<Map<String, dynamic>> login({
     required String email,
@@ -259,25 +334,25 @@ class ApiService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       );
-
+  
       if (kDebugMode) {
+        print('Request payload: ${jsonEncode({'email': email, 'password': password})}');
         print('Raw API response: ${response.body}');
       }
-
+  
       final responseData = jsonDecode(response.body);
-
+  
       if (response.statusCode == 200) {
-        final token = responseData['data']['access_token'];
-        final user = responseData['data']['user'];
-        final accountName =
-            user['account_name']; // Pastikan key ini ada di response
-
+        final token = responseData['access_token'];
+        final user = responseData['user'];
+        final memberName = user['name'];
+  
         if (token != null && token.isNotEmpty) {
           await setToken(token);
-
+  
           final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('account_name', accountName ?? '');
-
+          await prefs.setString('member_name', memberName ?? '');
+  
           return {
             'success': true,
             'message': responseData['message'] ?? 'Login sukses',
@@ -293,8 +368,7 @@ class ApiService {
           };
         }
       } else {
-        final error = responseData['message'] ??
-            'Login gagal (Status: ${response.statusCode})';
+        final error = responseData['message'] ?? 'Login gagal';
         return {'success': false, 'message': error};
       }
     } catch (e) {
@@ -304,16 +378,15 @@ class ApiService {
       return {'success': false, 'message': 'Terjadi kesalahan: $e'};
     }
   }
-
   Future<bool> logout() async {
     await _loadToken();
     final response = await http.post(
-      Uri.parse('$baseUrl/logout'), // Endpoint benar
+      Uri.parse('$baseUrl/logout'),
       headers: _headers(),
     );
 
     if (response.statusCode == 200) {
-      await clearToken(); // hapus token & account name
+      await clearToken();
       return true;
     } else {
       return false;

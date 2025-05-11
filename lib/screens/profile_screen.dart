@@ -12,18 +12,20 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   String userEmail = 'Memuat...';
   String userName = 'Memuat...';
+  String userPhone = 'Memuat...'; // Tambahkan variabel untuk nomor telepon
 
   @override
   void initState() {
     super.initState();
-    _loadEmail();
+    _loadUserData(); // Memuat data pengguna
   }
 
-  Future<void> _loadEmail() async {
+  Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       userEmail = prefs.getString('email') ?? 'Tidak diketahui';
       userName = prefs.getString('name') ?? 'Tidak diketahui';
+      userPhone = prefs.getString('phone') ?? 'Belum tersedia'; // Memuat nomor telepon
     });
   }
 
@@ -62,11 +64,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
-  
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final maxContentWidth = screenWidth > 600 ? 500.0 : double.infinity;
-
+  
     return Scaffold(
       appBar: AppBar(title: const Text('Profil')),
       body: Center(
@@ -86,12 +87,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Email Anda:',
+                        'Nama Pengguna:',
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        userEmail,
+                        userName,
                         style: Theme.of(context).textTheme.bodyLarge,
                         textAlign: TextAlign.center,
                       ),
@@ -99,8 +100,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                buildIconRow(Icons.person, 'Nama Pengguna', userName),
-                buildIconRow(Icons.phone, 'Telepon', 'Belum tersedia'),
+                buildIconRow(Icons.email, 'Email Anda', userEmail), // Menampilkan email
+                buildIconRow(Icons.phone, 'Telepon', userPhone), // Menampilkan nomor telepon
                 buildIconRow(Icons.info, 'Tentang', 'Ini adalah halaman profil Anda'),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(

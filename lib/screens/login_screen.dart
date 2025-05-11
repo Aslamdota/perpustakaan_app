@@ -29,10 +29,10 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {
       isLoading = true;
     });
-
+  
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
-
+  
     if (email.isEmpty || password.isEmpty) {
       setState(() {
         isLoading = false;
@@ -42,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
-
+  
     if (!_isEmailValid(email)) {
       setState(() {
         isLoading = false;
@@ -52,16 +52,19 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
-
+  
     try {
       final result = await apiService.login(email: email, password: password);
       if (result['success']) {
         final token = result['data']['access_token'];
+        final user = result['data']['user'];
+  
         if (token != null && token.isNotEmpty) {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', token);
           await prefs.setString('email', email);
-          await prefs.setString('name', result['data']['user']['name']);
+          await prefs.setString('name', user['name']); // Simpan nama pengguna
+          await prefs.setString('phone', user['phone'] ?? '');
 
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(

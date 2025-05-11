@@ -13,7 +13,7 @@ class _HomeContentState extends State<HomeContent> {
   final ApiService apiService = ApiService();
   late Future<List<dynamic>> _categoriesFuture;
   late Future<List<dynamic>> _latestBooksFuture;
-  String userName = 'User'; // Default nama pengguna
+  String userName = 'Member'; // Default nama pengguna
 
   @override
   void initState() {
@@ -26,7 +26,7 @@ class _HomeContentState extends State<HomeContent> {
   Future<void> _loadUserName() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      userName = prefs.getString('name') ?? 'User'; // Ambil nama dari SharedPreferences
+      userName = prefs.getString('member_name') ?? 'Member'; // Ganti dari 'name' ke 'member_name'
     });
   }
 
