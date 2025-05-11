@@ -87,7 +87,12 @@ class _LoanListScreenState extends State<LoanListScreen> {
                             },
                             child: const Text('Ambil Buku'),
                           )
-                        : null,
+                        : loan['status'] == 'Rejected'
+                            ? const Text(
+                                'Ditolak',
+                                style: TextStyle(color: Colors.red),
+                              )
+                            : null,
                   ),
                 );
               },
