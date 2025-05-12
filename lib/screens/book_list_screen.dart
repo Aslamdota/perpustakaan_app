@@ -13,6 +13,8 @@ class _BookListScreenState extends State<BookListScreen> {
   final ApiService apiService = ApiService();
   late Future<List<dynamic>> _booksFuture;
   String? _memberId;
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   @override
   void initState() {
@@ -46,7 +48,7 @@ class _BookListScreenState extends State<BookListScreen> {
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
-      ),
+      ), // Added closing parenthesis for shape parameter
       builder: (context) {
         return DraggableScrollableSheet(
           expand: false,
@@ -124,34 +126,49 @@ class _BookListScreenState extends State<BookListScreen> {
 
   Future<void> _handleBookLoan(
       BuildContext context, Map<String, dynamic> book) async {
-    Navigator.pop(context);
-
-    if (_memberId == null || _memberId!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Anda harus login terlebih dahulu')),
-      );
-      return;
-    }
-
     try {
+      // Close the bottom sheet first
+      Navigator.pop(context);
+
+      if (_memberId == null || _memberId!.isEmpty) {
+        _showSnackBar(context, 'Anda harus login terlebih dahulu');
+        return;
+      }
+
       final response = await apiService.createLoan(_memberId!, book['id']);
 
-      if (response['success'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Permintaan peminjaman dikirim')),
-        );
+      if (response['status'] == 'success') {
+        _showSnackBar(context, 'Permintaan peminjaman berhasil dibuat');
 
-        _loadBooks(); // Refresh book list
+        // Refresh book list after a short delay
+        await Future.delayed(const Duration(milliseconds: 1500));
+        _loadBooks();
+
+        // Navigate to loans screen after another short delay
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted) {
+          Navigator.pushNamed(context, '/loans');
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response['message'] ?? 'Gagal meminjam buku')),
-        );
+        _showSnackBar(context, response['message'] ?? 'Gagal meminjam buku');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      if (mounted) {
+        _showSnackBar(context, 'Error: ${e.toString()}');
+      }
     }
+  }
+
+  // Helper method to show snackbar
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(10),
+      ),
+    );
   }
 
   Widget _infoRow(String label, String? value, Color textColor) {
