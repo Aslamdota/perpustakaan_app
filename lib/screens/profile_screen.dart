@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_screen.dart';
+import '../settings/setting_screen.dart';
+import '../settings/notification_screen.dart';
+import '../settings/denda_screen.dart'; // Tambahkan ini
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -10,22 +13,18 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String userEmail = 'Memuat...';
   String userName = 'Memuat...';
-  String userPhone = 'Memuat...'; // Tambahkan variabel untuk nomor telepon
 
   @override
   void initState() {
     super.initState();
-    _loadUserData(); // Memuat data pengguna
+    _loadUserData();
   }
 
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      userEmail = prefs.getString('email') ?? 'Tidak diketahui';
       userName = prefs.getString('name') ?? 'Tidak diketahui';
-      userPhone = prefs.getString('phone') ?? 'Belum tersedia'; // Memuat nomor telepon
     });
   }
 
@@ -41,81 +40,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget buildIconRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 20),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text(value, softWrap: true),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final maxContentWidth = screenWidth > 600 ? 500.0 : double.infinity;
-  
     return Scaffold(
       appBar: AppBar(title: const Text('Profil')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxContentWidth),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+      body: ListView(
+        padding: const EdgeInsets.all(24.0),
+        children: [
+          Center(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: Column(
-                    children: [
-                      const CircleAvatar(
-                        radius: 50,
-                        backgroundImage: AssetImage('assets/images/profile_placeholder.png'),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Nama Pengguna:',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        userName,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
+                const CircleAvatar(
+                  radius: 50,
+                  backgroundImage: AssetImage('assets/images/profile_placeholder.png'),
                 ),
-                const SizedBox(height: 32),
-                buildIconRow(Icons.email, 'Email Anda', userEmail), // Menampilkan email
-                buildIconRow(Icons.phone, 'Telepon', userPhone), // Menampilkan nomor telepon
-                buildIconRow(Icons.info, 'Tentang', 'Ini adalah halaman profil Anda'),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  onPressed: _logout,
-                  icon: const Icon(Icons.logout),
-                  label: const Text('Logout'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                  ),
+                const SizedBox(height: 16),
+                Text(
+                  userName,
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],
             ),
           ),
-        ),
+          const SizedBox(height: 32),
+          ListTile(
+            leading: const Icon(Icons.lock),
+            title: const Text('Privasi'),
+            subtitle: const Text('Pengaturan privasi'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.notifications),
+            title: const Text('Notifikasi'),
+            subtitle: const Text('Preferensi notifikasi'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const NotificationScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.warning),
+            title: const Text('Denda'),
+            subtitle: const Text('Informasi dan histori denda'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DendaScreen()),
+              );
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text('Logout'),
+            onTap: _logout,
+          ),
+        ],
       ),
     );
   }

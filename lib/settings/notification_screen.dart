@@ -6,11 +6,12 @@ class NotificationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notifications'),
-      ),
+      appBar: AppBar(title: const Text('Notifikasi')),
       body: const Center(
-        child: Text('Belum ada notifikasi baru.'),
+        child: Text(
+          'Halaman pengaturan notifikasi',
+          style: TextStyle(fontSize: 18),
+        ),
       ),
     );
   }

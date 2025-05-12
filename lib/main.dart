@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:library_frontend/screens/loan_list_screen.dart';
 import 'package:library_frontend/screens/member_list_screen.dart';
 import 'package:library_frontend/screens/return_list_screen.dart';
-import 'package:library_frontend/screens/setting_screen.dart';
+import 'package:library_frontend/settings/setting_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/book_list_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
-import 'screens/notification_screen.dart';
+import 'settings/notification_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

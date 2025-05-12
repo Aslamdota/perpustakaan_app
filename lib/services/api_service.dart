@@ -323,6 +323,65 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> getProfile() async {
+    await _loadToken();
+    final response = await http.get(
+      Uri.parse('$baseUrl/profile'),
+      headers: _headers(),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data['data'] ?? {};
+    } else {
+      throw Exception('Gagal memuat profil: ${response.body}');
+    }
+  }
+
+  Future<bool> updateProfile({
+    required String name,
+    required String email,
+  }) async {
+    await _loadToken();
+    final response = await http.put(
+      Uri.parse('$baseUrl/profile'),
+      headers: _headers(),
+      body: json.encode({
+        'name': name,
+        'email': email,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw Exception('Gagal mengupdate profil: ${response.body}');
+    }
+  }
+
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    await _loadToken();
+    final response = await http.post(
+      Uri.parse('$baseUrl/change-password'),
+      headers: _headers(),
+      body: json.encode({
+        'current_password': currentPassword,
+        'new_password': newPassword,
+        'new_password_confirmation': confirmPassword,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw Exception('Gagal mengganti password: ${response.body}');
+    }
+  }
+
   Future<Map<String, dynamic>> login({
     required String email,
     required String password,
