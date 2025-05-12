@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 
 class BookListScreen extends StatefulWidget {
@@ -11,17 +12,29 @@ class BookListScreen extends StatefulWidget {
 class _BookListScreenState extends State<BookListScreen> {
   final ApiService apiService = ApiService();
   late Future<List<dynamic>> _booksFuture;
+  String? _memberId;
 
   @override
   void initState() {
     super.initState();
     _loadBooks();
+    _loadMemberId();
   }
 
   void _loadBooks() {
     setState(() {
       _booksFuture = apiService.getBooks();
     });
+  }
+
+  Future<void> _loadMemberId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final memberId = prefs.getString('member_id');
+    if (memberId != null) {
+      setState(() {
+        _memberId = memberId;
+      });
+    }
   }
 
   void _showBookDetails(BuildContext context, Map<String, dynamic> book) {
@@ -89,28 +102,7 @@ class _BookListScreenState extends State<BookListScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: () async {
-                        Navigator.pop(context);
-                        try {
-                          final response = await apiService.createLoan(members['id'],book['id']);
-                          if (response['success'] == true) {
-                            // ignore: use_build_context_synchronously
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Permintaan peminjaman dikirim')),
-                            );
-                          } else {
-                            // ignore: use_build_context_synchronously
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Gagal meminjam buku')),
-                            );
-                          }
-                        } catch (e) {
-                          // ignore: use_build_context_synchronously
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error: $e')),
-                          );
-                        }
-                      },
+                      onPressed: () => _handleBookLoan(context, book),
                       icon: const Icon(Icons.shopping_cart_checkout),
                       label: const Text('Pinjam Buku'),
                       style: ElevatedButton.styleFrom(
@@ -128,6 +120,37 @@ class _BookListScreenState extends State<BookListScreen> {
         );
       },
     );
+  }
+
+  Future<void> _handleBookLoan(
+      BuildContext context, Map<String, dynamic> book) async {
+    Navigator.pop(context);
+
+    if (_memberId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Anda harus login terlebih dahulu')),
+      );
+      return;
+    }
+
+    try {
+      final response = await apiService.createLoan(_memberId!, book['id']);
+
+      if (response['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Permintaan peminjaman dikirim')),
+        );
+        _loadBooks(); // Refresh book list
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response['message'] ?? 'Gagal meminjam buku')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
 
   Widget _infoRow(String label, String? value, Color textColor) {
@@ -162,7 +185,10 @@ class _BookListScreenState extends State<BookListScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _loadBooks,
+            onPressed: () {
+              _loadBooks();
+              _loadMemberId();
+            },
           ),
         ],
       ),
@@ -190,54 +216,53 @@ class _BookListScreenState extends State<BookListScreen> {
             return const Center(
               child: Text('Tidak ada buku yang tersedia.'),
             );
-          } else {
-            final books = snapshot.data!;
-            final favoriteBooks =
-                books.where((book) => book['is_favorite'] == true).toList();
-            final otherBooks =
-                books.where((book) => book['is_favorite'] != true).toList();
+          }
 
-            return ListView(
-              padding: const EdgeInsets.all(16.0),
-              children: [
-                if (favoriteBooks.isNotEmpty) ...[
-                  const Text(
-                    'Buku Favorit',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  ...favoriteBooks.map((book) => Card(
-                        color: const Color.fromARGB(255, 255, 248, 225),
-                        margin: const EdgeInsets.symmetric(vertical: 6.0),
-                        child: ListTile(
-                          leading:
-                              const Icon(Icons.favorite, color: Colors.red),
-                          title: Text(book['title'] ?? 'No Title'),
-                          subtitle: Text(
-                              'Stock: ${book['stock']?.toString() ?? '0'}'),
-                          onTap: () => _showBookDetails(context, book),
-                        ),
-                      )),
-                  const Divider(height: 32),
-                ],
+          final books = snapshot.data!;
+          final favoriteBooks =
+              books.where((book) => book['is_favorite'] == true).toList();
+          final otherBooks =
+              books.where((book) => book['is_favorite'] != true).toList();
+
+          return ListView(
+            padding: const EdgeInsets.all(16.0),
+            children: [
+              if (favoriteBooks.isNotEmpty) ...[
                 const Text(
-                  'Semua Buku',
+                  'Buku Favorit',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                ...otherBooks.map((book) => Card(
+                ...favoriteBooks.map((book) => Card(
+                      color: const Color.fromARGB(255, 255, 248, 225),
                       margin: const EdgeInsets.symmetric(vertical: 6.0),
                       child: ListTile(
-                        leading: const Icon(Icons.book),
+                        leading: const Icon(Icons.favorite, color: Colors.red),
                         title: Text(book['title'] ?? 'No Title'),
                         subtitle:
                             Text('Stock: ${book['stock']?.toString() ?? '0'}'),
                         onTap: () => _showBookDetails(context, book),
                       ),
                     )),
+                const Divider(height: 32),
               ],
-            );
-          }
+              const Text(
+                'Semua Buku',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              ...otherBooks.map((book) => Card(
+                    margin: const EdgeInsets.symmetric(vertical: 6.0),
+                    child: ListTile(
+                      leading: const Icon(Icons.book),
+                      title: Text(book['title'] ?? 'No Title'),
+                      subtitle:
+                          Text('Stock: ${book['stock']?.toString() ?? '0'}'),
+                      onTap: () => _showBookDetails(context, book),
+                    ),
+                  )),
+            ],
+          );
         },
       ),
     );
