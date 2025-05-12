@@ -152,19 +152,19 @@ class ApiService {
   Future<List<dynamic>> getLoans() async {
     await _loadToken(); // Pastikan token dimuat
     final url = Uri.parse('$baseUrl/getBorrowing');
-  
+
     try {
       final response = await http.get(
         url,
         headers: _headers(),
       );
-  
+
       if (kDebugMode) {
         print('Request URL: $url');
         print('Request Headers: ${_headers()}');
         print('Raw API response: ${response.body}');
       }
-  
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['status'] == 'success') {
@@ -186,7 +186,7 @@ class ApiService {
   Future<void> borrowBook(int bookId, int memberId) async {
     await _loadToken(); // Pastikan token dimuat
     final url = Uri.parse('$baseUrl/borrowings');
-  
+
     try {
       final response = await http.post(
         url,
@@ -197,18 +197,18 @@ class ApiService {
           'borrow_date': DateTime.now().toIso8601String(),
         }),
       );
-  
+
       if (kDebugMode) {
         print('Request URL: $url');
         print('Request Headers: ${_headers()}');
         print('Request Body: ${jsonEncode({
-          'book_id': bookId,
-          'member_id': memberId,
-          'borrow_date': DateTime.now().toIso8601String(),
-        })}');
+              'book_id': bookId,
+              'member_id': memberId,
+              'borrow_date': DateTime.now().toIso8601String(),
+            })}');
         print('Raw API response: ${response.body}');
       }
-  
+
       if (response.statusCode != 200) {
         throw Exception('Gagal meminjam buku: ${response.body}');
       }
@@ -223,19 +223,19 @@ class ApiService {
   Future<void> returnBook(int borrowingId) async {
     await _loadToken(); // Pastikan token dimuat
     final url = Uri.parse('$baseUrl/borrowings/$borrowingId/return');
-  
+
     try {
       final response = await http.put(
         url,
         headers: _headers(),
       );
-  
+
       if (kDebugMode) {
         print('Request URL: $url');
         print('Request Headers: ${_headers()}');
         print('Raw API response: ${response.body}');
       }
-  
+
       if (response.statusCode != 200) {
         throw Exception('Gagal mengembalikan buku: ${response.body}');
       }
@@ -267,9 +267,7 @@ class ApiService {
     final response = await http.post(
       url,
       headers: _headers(),
-      body: jsonEncode({
-        'member_id' : memberId,
-        'book_id': bookId}),
+      body: jsonEncode({'member_id': memberId, 'book_id': bookId}),
     );
 
     if (response.statusCode == 201) {
@@ -395,25 +393,30 @@ class ApiService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       );
-  
+
       if (kDebugMode) {
-        print('Request payload: ${jsonEncode({'email': email, 'password': password})}');
+        print('Request payload: ${jsonEncode({
+              'email': email,
+              'password': password
+            })}');
         print('Raw API response: ${response.body}');
       }
-  
+
       final responseData = jsonDecode(response.body);
-  
+
       if (response.statusCode == 200) {
         final token = responseData['access_token'];
         final user = responseData['user'];
         final memberName = user['name'];
-  
+        final memberId = user['member_id'];
+
         if (token != null && token.isNotEmpty) {
           await setToken(token);
-  
+
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('member_name', memberName ?? '');
-  
+          await prefs.setString('member_id', memberId.toString());
+
           return {
             'success': true,
             'message': responseData['message'] ?? 'Login sukses',
@@ -439,6 +442,7 @@ class ApiService {
       return {'success': false, 'message': 'Terjadi kesalahan: $e'};
     }
   }
+
   Future<bool> logout() async {
     await _loadToken();
     final response = await http.post(

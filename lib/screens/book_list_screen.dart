@@ -126,7 +126,7 @@ class _BookListScreenState extends State<BookListScreen> {
       BuildContext context, Map<String, dynamic> book) async {
     Navigator.pop(context);
 
-    if (_memberId == null) {
+    if (_memberId == null || _memberId!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Anda harus login terlebih dahulu')),
       );
