@@ -140,6 +140,7 @@ class _BookListScreenState extends State<BookListScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Permintaan peminjaman dikirim')),
         );
+
         _loadBooks(); // Refresh book list
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

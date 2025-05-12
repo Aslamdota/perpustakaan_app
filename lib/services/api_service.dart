@@ -262,18 +262,28 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> createLoan(String memberId, int bookId) async {
-    await _loadToken();
-    final url = Uri.parse('$baseUrl/loanBook');
-    final response = await http.post(
-      url,
-      headers: _headers(),
-      body: jsonEncode({'member_id': memberId, 'book_id': bookId}),
-    );
+    try {
+      await _loadToken();
+      final url = Uri.parse('$baseUrl/loansBook');
+      final response = await http.post(
+        url,
+        headers: _headers(),
+        body: jsonEncode({'member_id': memberId, 'book_id': bookId}),
+      );
 
-    if (response.statusCode == 201) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Gagal membuat peminjaman: ${response.body}');
+      print(
+          'Loan API Response: ${response.statusCode} - ${response.body}'); // Add logging
+
+      final responseBody = jsonDecode(response.body);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return responseBody;
+      } else {
+        throw Exception(responseBody['message'] ?? 'Gagal membuat peminjaman');
+      }
+    } catch (e) {
+      print('Error in createLoan: $e'); // Add error logging
+      throw Exception('Terjadi kesalahan saat memproses peminjaman');
     }
   }
 
