@@ -92,7 +92,7 @@ class _BookListScreenState extends State<BookListScreen> {
                       onPressed: () async {
                         Navigator.pop(context);
                         try {
-                          final response = await apiService.createLoan(book['id']);
+                          final response = await apiService.createLoan(members['id'],book['id']);
                           if (response['success'] == true) {
                             // ignore: use_build_context_synchronously
                             ScaffoldMessenger.of(context).showSnackBar(

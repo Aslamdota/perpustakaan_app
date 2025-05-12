@@ -151,7 +151,7 @@ class ApiService {
 
   Future<List<dynamic>> getLoans() async {
     await _loadToken(); // Pastikan token dimuat
-    final url = Uri.parse('$baseUrl/loans');
+    final url = Uri.parse('$baseUrl/getBorrowing');
   
     try {
       final response = await http.get(
@@ -261,13 +261,15 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> createLoan(int bookId) async {
+  Future<Map<String, dynamic>> createLoan(String memberId, int bookId) async {
     await _loadToken();
-    final url = Uri.parse('$baseUrl/loans');
+    final url = Uri.parse('$baseUrl/loanBook');
     final response = await http.post(
       url,
       headers: _headers(),
-      body: jsonEncode({'book_id': bookId}),
+      body: jsonEncode({
+        'member_id' : memberId,
+        'book_id': bookId}),
     );
 
     if (response.statusCode == 201) {
