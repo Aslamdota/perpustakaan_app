@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'book_list_screen.dart';
-import 'member_list_screen.dart';
+//import 'member_list_screen.dart';
 import 'loan_list_screen.dart';
 import 'profile_screen.dart';
 import '../widgets/home_content.dart'; // Import widget konten utama
@@ -19,7 +19,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     const HomeContent(), // Konten utama dipindahkan ke widget terpisah
     const BookListScreen(),
-    const MemberListScreen(),
     const LoanListScreen(),
     const ProfileScreen(),
   ];
@@ -76,12 +75,8 @@ class _HomeScreenState extends State<HomeScreen> {
               label: 'Buku',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.people),
-              label: 'Anggota',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.library_books),
-              label: 'Pinjaman',
+              icon: Icon(Icons.history), // Ganti ikon
+              label: 'Riwayat',          // Ganti label
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),
