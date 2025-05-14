@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'book_list_screen.dart';
-//import 'member_list_screen.dart';
 import 'loan_list_screen.dart';
+import 'return_screen.dart';
 import 'profile_screen.dart';
-import '../widgets/home_content.dart'; // Import widget konten utama
+import '../widgets/home_content.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,9 +17,10 @@ class _HomeScreenState extends State<HomeScreen> {
   ThemeMode currentTheme = ThemeMode.light;
 
   final List<Widget> _screens = [
-    const HomeContent(), // Konten utama dipindahkan ke widget terpisah
+    const HomeContent(),
     const BookListScreen(),
     const LoanListScreen(),
+    const ReturnScreen(loanId: 0), // ← kamu bisa modifikasi sesuai logic realnya
     const ProfileScreen(),
   ];
 
@@ -75,8 +76,12 @@ class _HomeScreenState extends State<HomeScreen> {
               label: 'Buku',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.history), // Ganti ikon
-              label: 'Riwayat',          // Ganti label
+              icon: Icon(Icons.book_online),
+              label: 'Peminjaman',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.assignment_return),
+              label: 'Pengembalian',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),

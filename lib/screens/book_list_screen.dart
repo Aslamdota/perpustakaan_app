@@ -13,8 +13,6 @@ class _BookListScreenState extends State<BookListScreen> {
   final ApiService apiService = ApiService();
   late Future<List<dynamic>> _booksFuture;
   String? _memberId;
-  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
-      GlobalKey<ScaffoldMessengerState>();
 
   @override
   void initState() {
@@ -138,6 +136,7 @@ class _BookListScreenState extends State<BookListScreen> {
       final response = await apiService.createLoan(_memberId!, book['id']);
 
       if (response['status'] == 'success') {
+        // ignore: use_build_context_synchronously
         _showSnackBar(context, 'Permintaan peminjaman berhasil dibuat');
 
         // Refresh book list after a short delay
@@ -147,13 +146,16 @@ class _BookListScreenState extends State<BookListScreen> {
         // Navigate to loans screen after another short delay
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
+          // ignore: use_build_context_synchronously
           Navigator.pushNamed(context, '/loans');
         }
       } else {
+        // ignore: use_build_context_synchronously
         _showSnackBar(context, response['message'] ?? 'Gagal meminjam buku');
       }
     } catch (e) {
       if (mounted) {
+        // ignore: use_build_context_synchronously
         _showSnackBar(context, 'Error: ${e.toString()}');
       }
     }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
-import 'pickup_screen.dart';
 
 class LoanListScreen extends StatefulWidget {
   const LoanListScreen({super.key});
@@ -73,26 +72,15 @@ class _LoanListScreenState extends State<LoanListScreen> {
                   child: ListTile(
                     leading: const Icon(Icons.library_books),
                     title: Text(loan['book_title'] ?? 'No Title'),
-                    subtitle: Text('Status: ${loan['status']}'),
-                    trailing: loan['status'] == 'Approved'
-                        ? ElevatedButton(
-                            onPressed: () {
-                              // Navigasi ke halaman pengambilan buku
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => PickupScreen(loanId: loan['id']),
-                                ),
-                              );
-                            },
-                            child: const Text('Ambil Buku'),
-                          )
-                        : loan['status'] == 'Rejected'
-                            ? const Text(
-                                'Ditolak',
-                                style: TextStyle(color: Colors.red),
-                              )
-                            : null,
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Status: ${loan['status']}'),
+                        if (loan['loan_date'] != null)
+                          Text('Tanggal Pinjam: ${loan['loan_date']}'),
+                      ],
+                    ),
+                    trailing: _buildActionButton(loan),
                   ),
                 );
               },
@@ -101,5 +89,38 @@ class _LoanListScreenState extends State<LoanListScreen> {
         },
       ),
     );
+  }
+
+  Widget _buildActionButton(dynamic loan) {
+    if (loan['status'] == 'Approved') {
+      return ElevatedButton(
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            '/pickup',
+            arguments: {'loanId': loan['id']},
+          );
+        },
+        child: const Text('Ambil Buku'),
+      );
+    } else if (loan['status'] == 'Dipinjam') {
+      return ElevatedButton(
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            '/returns',
+            arguments: {'loanId': loan['id']},
+          );
+        },
+        child: const Text('Kembalikan Buku'),
+      );
+    } else if (loan['status'] == 'Rejected') {
+      return const Text(
+        'Ditolak',
+        style: TextStyle(color: Colors.red),
+      );
+    } else {
+      return const SizedBox(); // Status lain: Returned, Canceled, dll
+    }
   }
 }

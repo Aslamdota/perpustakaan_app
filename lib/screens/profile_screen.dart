@@ -4,6 +4,8 @@ import 'login_screen.dart';
 import '../settings/setting_screen.dart';
 import '../settings/notification_screen.dart';
 import '../settings/denda_screen.dart'; // Tambahkan ini
+import '../settings/history_screen.dart'; // Tambahkan ini
+
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -93,6 +95,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const DendaScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.history),
+            title: const Text('Riwayat'),
+            subtitle: const Text('Lihat riwayat peminjaman dan pengembalian'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HistoryScreen()),
               );
             },
           ),

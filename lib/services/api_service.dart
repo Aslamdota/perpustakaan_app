@@ -183,6 +183,48 @@ class ApiService {
     }
   }
 
+  Future<List<dynamic>> getBorrowingLoans() async {
+    await _loadToken();
+    final url = Uri.parse('$baseUrl/getBorrowing');
+
+    final response = await http.get(url, headers: _headers());
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['data'] ?? [];
+    } else {
+      throw Exception('Gagal memuat daftar peminjaman: ${response.body}');
+    }
+  }
+
+  Future<List<dynamic>> getReturnableLoans() async {
+    await _loadToken();
+    final url = Uri.parse('$baseUrl/getLoan');
+
+    final response = await http.get(url, headers: _headers());
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['data'] ?? [];
+    } else {
+      throw Exception('Gagal memuat daftar pengembalian: ${response.body}');
+    }
+  }
+
+  Future<List<dynamic>> getReturnedLoans() async {
+    await _loadToken();
+    final url = Uri.parse('$baseUrl/getReturned'); // Pastikan endpoint ini ada di backend
+
+    final response = await http.get(url, headers: _headers());
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['data'] ?? [];
+    } else {
+      throw Exception('Gagal memuat riwayat pengembalian: ${response.body}');
+    }
+  }
+
+
   Future<void> borrowBook(int bookId, int memberId) async {
     await _loadToken(); // Pastikan token dimuat
     final url = Uri.parse('$baseUrl/borrowings');
@@ -220,9 +262,9 @@ class ApiService {
     }
   }
 
-  Future<void> returnBook(int borrowingId) async {
+  Future<Map<String, dynamic>> returnBook(int loanId) async {
     await _loadToken(); // Pastikan token dimuat
-    final url = Uri.parse('$baseUrl/borrowings/$borrowingId/return');
+    final url = Uri.parse('$baseUrl/returns/$loanId');
 
     try {
       final response = await http.put(
@@ -236,14 +278,22 @@ class ApiService {
         print('Raw API response: ${response.body}');
       }
 
-      if (response.statusCode != 200) {
-        throw Exception('Gagal mengembalikan buku: ${response.body}');
+      if (response.statusCode == 200) {
+        return json.decode(response.body); // success response dari backend
+      } else {
+        return {
+          'success': false,
+          'message': 'Gagal mengembalikan buku: ${response.body}'
+        };
       }
     } catch (e) {
       if (kDebugMode) {
         print('Error returning book: $e');
       }
-      throw Exception('Error returning book: $e');
+      return {
+        'success': false,
+        'message': 'Error returning book: $e',
+      };
     }
   }
 
@@ -271,8 +321,10 @@ class ApiService {
         body: jsonEncode({'member_id': memberId, 'book_id': bookId}),
       );
 
-      print(
-          'Loan API Response: ${response.statusCode} - ${response.body}'); // Add logging
+      if (kDebugMode) {
+        print(
+          'Loan API Response: ${response.statusCode} - ${response.body}');
+      } // Add logging
 
       final responseBody = jsonDecode(response.body);
 
@@ -282,7 +334,9 @@ class ApiService {
         throw Exception(responseBody['message'] ?? 'Gagal membuat peminjaman');
       }
     } catch (e) {
-      print('Error in createLoan: $e'); // Add error logging
+      if (kDebugMode) {
+        print('Error in createLoan: $e');
+      } // Add error logging
       throw Exception('Terjadi kesalahan saat memproses peminjaman');
     }
   }
