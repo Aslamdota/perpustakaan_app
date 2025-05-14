@@ -30,43 +30,68 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  Widget buildSettingItem(IconData icon, String label, String value) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(label),
-      subtitle: Text(value),
+  Widget _buildInfoTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      elevation: 4,
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: ListTile(
+        leading: Icon(icon, color: Colors.blueAccent),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(subtitle),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: ListView(
-        padding: const EdgeInsets.all(24.0),
-        children: [
-          // Avatar dan Nama Pengguna
-          Center(
-            child: Column(
-              children: [
-                const CircleAvatar(
-                  radius: 50,
-                  backgroundImage: AssetImage('assets/images/profile_placeholder.png'),
+      appBar: AppBar(
+        title: const Text('Pengaturan Akun'),
+        backgroundColor: const Color(0xFF8F94FB),
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 30),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF4E54C8), Color(0xFF8F94FB)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  name,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ],
+              ),
+              child: Column(
+                children: [
+                  const CircleAvatar(
+                    radius: 50,
+                    backgroundImage: AssetImage('assets/images/profile_placeholder.png'),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 32),
-          // Daftar item setting
-          buildSettingItem(Icons.email, 'Email', email),
-          buildSettingItem(Icons.phone, 'Telepon', phone),
-          buildSettingItem(Icons.home, 'Alamat', address),
-        ],
+            const SizedBox(height: 16),
+            _buildInfoTile(icon: Icons.email, title: 'Email', subtitle: email),
+            _buildInfoTile(icon: Icons.phone, title: 'Telepon', subtitle: phone),
+            _buildInfoTile(icon: Icons.home, title: 'Alamat', subtitle: address),
+          ],
+        ),
       ),
     );
   }

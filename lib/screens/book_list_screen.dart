@@ -46,7 +46,7 @@ class _BookListScreenState extends State<BookListScreen> {
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
-      ), // Added closing parenthesis for shape parameter
+      ),
       builder: (context) {
         return DraggableScrollableSheet(
           expand: false,
@@ -73,8 +73,7 @@ class _BookListScreenState extends State<BookListScreen> {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      const Icon(Icons.book,
-                          size: 48, color: Colors.deepPurple),
+                      const Icon(Icons.book, size: 48, color: Colors.deepPurple),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -94,10 +93,8 @@ class _BookListScreenState extends State<BookListScreen> {
                   _infoRow('Penulis', book['author'], textColor),
                   _infoRow('Penerbit', book['publisher'], textColor),
                   _infoRow('ISBN', book['isbn'], textColor),
-                  _infoRow('Tahun Terbit', book['publication_year']?.toString(),
-                      textColor),
-                  _infoRow(
-                      'Stok Tersedia', book['stock']?.toString(), textColor),
+                  _infoRow('Tahun Terbit', book['publication_year']?.toString(), textColor),
+                  _infoRow('Stok Tersedia', book['stock']?.toString(), textColor),
                   const SizedBox(height: 24),
                   SizedBox(
                     width: double.infinity,
@@ -108,8 +105,7 @@ class _BookListScreenState extends State<BookListScreen> {
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         textStyle: const TextStyle(fontSize: 16),
-                        backgroundColor:
-                            const Color.fromARGB(255, 170, 140, 223),
+                        backgroundColor: const Color.fromARGB(255, 170, 140, 223),
                       ),
                     ),
                   ),
@@ -122,10 +118,8 @@ class _BookListScreenState extends State<BookListScreen> {
     );
   }
 
-  Future<void> _handleBookLoan(
-      BuildContext context, Map<String, dynamic> book) async {
+  Future<void> _handleBookLoan(BuildContext context, Map<String, dynamic> book) async {
     try {
-      // Close the bottom sheet first
       Navigator.pop(context);
 
       if (_memberId == null || _memberId!.isEmpty) {
@@ -139,11 +133,9 @@ class _BookListScreenState extends State<BookListScreen> {
         // ignore: use_build_context_synchronously
         _showSnackBar(context, 'Permintaan peminjaman berhasil dibuat');
 
-        // Refresh book list after a short delay
         await Future.delayed(const Duration(milliseconds: 1500));
         _loadBooks();
 
-        // Navigate to loans screen after another short delay
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
           // ignore: use_build_context_synchronously
@@ -161,7 +153,6 @@ class _BookListScreenState extends State<BookListScreen> {
     }
   }
 
-  // Helper method to show snackbar
   void _showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -239,10 +230,8 @@ class _BookListScreenState extends State<BookListScreen> {
           }
 
           final books = snapshot.data!;
-          final favoriteBooks =
-              books.where((book) => book['is_favorite'] == true).toList();
-          final otherBooks =
-              books.where((book) => book['is_favorite'] != true).toList();
+          final favoriteBooks = books.where((book) => book['is_favorite'] == true).toList();
+          final otherBooks = books.where((book) => book['is_favorite'] != true).toList();
 
           return ListView(
             padding: const EdgeInsets.all(16.0),
@@ -259,8 +248,7 @@ class _BookListScreenState extends State<BookListScreen> {
                       child: ListTile(
                         leading: const Icon(Icons.favorite, color: Colors.red),
                         title: Text(book['title'] ?? 'No Title'),
-                        subtitle:
-                            Text('Stock: ${book['stock']?.toString() ?? '0'}'),
+                        subtitle: Text('Stock: ${book['stock']?.toString() ?? '0'}'),
                         onTap: () => _showBookDetails(context, book),
                       ),
                     )),
@@ -276,8 +264,7 @@ class _BookListScreenState extends State<BookListScreen> {
                     child: ListTile(
                       leading: const Icon(Icons.book),
                       title: Text(book['title'] ?? 'No Title'),
-                      subtitle:
-                          Text('Stock: ${book['stock']?.toString() ?? '0'}'),
+                      subtitle: Text('Stock: ${book['stock']?.toString() ?? '0'}'),
                       onTap: () => _showBookDetails(context, book),
                     ),
                   )),

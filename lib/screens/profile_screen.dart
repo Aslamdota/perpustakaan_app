@@ -1,11 +1,12 @@
+// Perbaikan UI untuk ProfileScreen dan SettingsScreen
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login_screen.dart';
 import '../settings/setting_screen.dart';
 import '../settings/notification_screen.dart';
-import '../settings/denda_screen.dart'; // Tambahkan ini
-import '../settings/history_screen.dart'; // Tambahkan ini
-
+import '../settings/denda_screen.dart';
+import '../settings/history_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -42,10 +43,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget buildProfileOption(
+      {required IconData icon,
+      required String title,
+      required String subtitle,
+      required VoidCallback onTap}) {
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: Icon(icon, color: Colors.blue),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(subtitle),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: onTap,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil')),
+      appBar: AppBar(title: const Text('Profil Saya')),
       body: ListView(
         padding: const EdgeInsets.all(24.0),
         children: [
@@ -54,66 +73,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 const CircleAvatar(
                   radius: 50,
-                  backgroundImage: AssetImage('assets/images/profile_placeholder.png'),
+                  backgroundImage:
+                      AssetImage('assets/images/profile_placeholder.png'),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 Text(
                   userName,
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 32),
-          ListTile(
-            leading: const Icon(Icons.lock),
-            title: const Text('Privasi'),
-            subtitle: const Text('Pengaturan privasi'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.notifications),
-            title: const Text('Notifikasi'),
-            subtitle: const Text('Preferensi notifikasi'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const NotificationScreen()),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.warning),
-            title: const Text('Denda'),
-            subtitle: const Text('Informasi dan histori denda'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const DendaScreen()),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.history),
-            title: const Text('Riwayat'),
-            subtitle: const Text('Lihat riwayat peminjaman dan pengembalian'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HistoryScreen()),
-              );
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Logout'),
-            onTap: _logout,
+          const SizedBox(height: 24),
+          buildProfileOption(
+              icon: Icons.lock,
+              title: 'Privasi',
+              subtitle: 'Pengaturan privasi',
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SettingsScreen()))),
+          buildProfileOption(
+              icon: Icons.notifications,
+              title: 'Notifikasi',
+              subtitle: 'Preferensi notifikasi',
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const NotificationScreen()))),
+          buildProfileOption(
+              icon: Icons.warning,
+              title: 'Denda',
+              subtitle: 'Informasi dan histori denda',
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const DendaScreen()))),
+          buildProfileOption(
+              icon: Icons.history,
+              title: 'Riwayat',
+              subtitle: 'Lihat histori peminjaman dan pengembalian',
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const HistoryScreen()))),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+            onPressed: _logout,
+            icon: const Icon(Icons.logout),
+            label: const Text('Logout'),
           ),
         ],
       ),
