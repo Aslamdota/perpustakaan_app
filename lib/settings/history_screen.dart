@@ -20,43 +20,96 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   void _loadHistory() {
     setState(() {
-      _historyFuture = apiService.getReturns(); // Pastikan getReturns fetch yang sudah dikembalikan
+      _historyFuture = apiService.getReturnedLoans();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Riwayat Pengembalian')),
+      backgroundColor: const Color(0xFFF5F6FA),
+      appBar: AppBar(
+        title: const Text('Riwayat Pengembalian'),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF6C63FF),
+        elevation: 0,
+      ),
       body: FutureBuilder<List<dynamic>>(
         future: _historyFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Terjadi kesalahan: ${snapshot.error}'));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.error, size: 48, color: Colors.redAccent),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Terjadi kesalahan:\n${snapshot.error}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ],
+                ),
+              ),
+            );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Belum ada riwayat pengembalian.'));
+            return const Center(
+              child: Text(
+                'Belum ada riwayat pengembalian.',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+            );
           }
 
           final history = snapshot.data!;
-          return ListView.builder(
-            padding: const EdgeInsets.all(12),
+          return ListView.separated(
+            padding: const EdgeInsets.all(16),
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemCount: history.length,
             itemBuilder: (context, index) {
               final item = history[index];
-              return Card(
-                margin: const EdgeInsets.symmetric(vertical: 8),
+              return Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      // ignore: deprecated_member_use
+                      color: Colors.grey.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: ListTile(
-                  leading: const Icon(Icons.book_outlined),
-                  title: Text(item['book_title'] ?? 'Judul tidak tersedia'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Tanggal Pinjam: ${item['loan_date'] ?? '-'}'),
-                      Text('Tanggal Kembali: ${item['updated_at'] ?? '-'}'),
-                      Text('Status: ${item['status'] ?? '-'}'),
-                    ],
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  leading: const CircleAvatar(
+                    backgroundColor: Color(0xFF6C63FF),
+                    child: Icon(Icons.history, color: Colors.white),
+                  ),
+                  title: Text(
+                    item['book_title'] ?? 'Judul tidak tersedia',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('📅 Pinjam: ${item['loan_date'] ?? '-'}'),
+                        Text('✅ Kembali: ${item['updated_at'] ?? '-'}'),
+                        Text('🔁 Status: ${item['status'] ?? '-'}'),
+                      ],
+                    ),
                   ),
                 ),
               );

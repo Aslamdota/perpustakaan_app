@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
@@ -11,14 +13,29 @@ class BookListScreen extends StatefulWidget {
 
 class _BookListScreenState extends State<BookListScreen> {
   final ApiService apiService = ApiService();
+  final TextEditingController _searchController = TextEditingController();
   late Future<List<dynamic>> _booksFuture;
   String? _memberId;
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
+    _searchController.addListener(_onSearchChanged);
     _loadBooks();
     _loadMemberId();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _searchQuery = _searchController.text.toLowerCase();
+    });
   }
 
   void _loadBooks() {
@@ -130,24 +147,20 @@ class _BookListScreenState extends State<BookListScreen> {
       final response = await apiService.createLoan(_memberId!, book['id']);
 
       if (response['status'] == 'success') {
+        // ignore: duplicate_ignore
         // ignore: use_build_context_synchronously
         _showSnackBar(context, 'Permintaan peminjaman berhasil dibuat');
-
         await Future.delayed(const Duration(milliseconds: 1500));
         _loadBooks();
-
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
-          // ignore: use_build_context_synchronously
           Navigator.pushNamed(context, '/loans');
         }
       } else {
-        // ignore: use_build_context_synchronously
         _showSnackBar(context, response['message'] ?? 'Gagal meminjam buku');
       }
     } catch (e) {
       if (mounted) {
-        // ignore: use_build_context_synchronously
         _showSnackBar(context, 'Error: ${e.toString()}');
       }
     }
@@ -188,11 +201,52 @@ class _BookListScreenState extends State<BookListScreen> {
     );
   }
 
+  Widget _buildBookCard(BuildContext context, dynamic book, {bool isFavorite = false}) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 3,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        leading: Icon(
+          isFavorite ? Icons.favorite : Icons.book,
+          color: isFavorite ? Colors.red : Colors.deepPurple,
+          size: 32,
+        ),
+        title: Text(
+          book['title'] ?? 'Tanpa Judul',
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text('Stok: ${book['stock']?.toString() ?? '0'}'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => _showBookDetails(context, book),
+      ),
+    );
+  }
+
+  bool _matchesSearch(dynamic book) {
+    if (_searchQuery.isEmpty) return true;
+
+    final title = (book['title'] ?? '').toString().toLowerCase();
+    final author = (book['author'] ?? '').toString().toLowerCase();
+    final category = (book['category'] ?? '').toString().toLowerCase();
+    final publisher = (book['publisher'] ?? '').toString().toLowerCase();
+
+    return title.contains(_searchQuery) ||
+        author.contains(_searchQuery) ||
+        category.contains(_searchQuery) ||
+        publisher.contains(_searchQuery);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF7F8FA),
       appBar: AppBar(
-        title: const Text('Daftar Buku'),
+        backgroundColor: const Color(0xFF8F94FB),
+        elevation: 0,
+        title: const Text('📚 Daftar Buku'),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -213,8 +267,10 @@ class _BookListScreenState extends State<BookListScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                  const SizedBox(height: 8),
                   const Text('Gagal memuat data buku'),
-                  Text(snapshot.error.toString()),
+                  Text(snapshot.error.toString(), textAlign: TextAlign.center),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _loadBooks,
@@ -225,7 +281,7 @@ class _BookListScreenState extends State<BookListScreen> {
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
-              child: Text('Tidak ada buku yang tersedia.'),
+              child: Text('📖 Tidak ada buku yang tersedia.'),
             );
           }
 
@@ -236,38 +292,35 @@ class _BookListScreenState extends State<BookListScreen> {
           return ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
-              if (favoriteBooks.isNotEmpty) ...[
-                const Text(
-                  'Buku Favorit',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              // 🔍 Search Bar
+              TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Cari judul, penulis, kategori...',
+                  prefixIcon: const Icon(Icons.search),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
+              ),
+              const SizedBox(height: 20),
+
+              // ❤️ Buku Favorit (filtered)
+              if (favoriteBooks.where(_matchesSearch).isNotEmpty) ...[
+                const Text('❤️ Buku Favorit', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                ...favoriteBooks.map((book) => Card(
-                      color: const Color.fromARGB(255, 255, 248, 225),
-                      margin: const EdgeInsets.symmetric(vertical: 6.0),
-                      child: ListTile(
-                        leading: const Icon(Icons.favorite, color: Colors.red),
-                        title: Text(book['title'] ?? 'No Title'),
-                        subtitle: Text('Stock: ${book['stock']?.toString() ?? '0'}'),
-                        onTap: () => _showBookDetails(context, book),
-                      ),
-                    )),
+                ...favoriteBooks.where(_matchesSearch).map((book) => _buildBookCard(context, book, isFavorite: true)),
                 const Divider(height: 32),
               ],
-              const Text(
-                'Semua Buku',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+
+              // 📘 Semua Buku (filtered)
+              const Text('📘 Semua Buku', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              ...otherBooks.map((book) => Card(
-                    margin: const EdgeInsets.symmetric(vertical: 6.0),
-                    child: ListTile(
-                      leading: const Icon(Icons.book),
-                      title: Text(book['title'] ?? 'No Title'),
-                      subtitle: Text('Stock: ${book['stock']?.toString() ?? '0'}'),
-                      onTap: () => _showBookDetails(context, book),
-                    ),
-                  )),
+              ...otherBooks.where(_matchesSearch).map((book) => _buildBookCard(context, book)),
             ],
           );
         },
