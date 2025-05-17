@@ -1,136 +1,197 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
+import '../screens/book_list_screen.dart';
 
-class HomeContent extends StatefulWidget {
-  const HomeContent({super.key});
+class ModernHomeContent extends StatefulWidget {
+  const ModernHomeContent({super.key});
 
   @override
-  State<HomeContent> createState() => _HomeContentState();
+  State<ModernHomeContent> createState() => _ModernHomeContentState();
 }
 
-class _HomeContentState extends State<HomeContent> {
+class _ModernHomeContentState extends State<ModernHomeContent> {
   final ApiService apiService = ApiService();
+
   late Future<List<dynamic>> _categoriesFuture;
-  late Future<List<dynamic>> _latestBooksFuture;
-  String userName = 'Member'; // Default nama pengguna
+  late Future<List<dynamic>> _recommendationFuture;
+  String memberName = 'Member';
 
   @override
   void initState() {
     super.initState();
-    _loadUserName(); // Memuat nama pengguna dari SharedPreferences
-    _categoriesFuture = apiService.getCategories(); // Memuat kategori
-    _latestBooksFuture = apiService.getLatestBooks(); // Memuat buku terbaru
+    _categoriesFuture = apiService.getCategories();
+    _recommendationFuture = apiService.getLatestBooks();
+    _loadMemberName();
   }
 
-  Future<void> _loadUserName() async {
+  Future<void> _loadMemberName() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userName = prefs.getString('member_name') ?? 'Member'; // Ganti dari 'name' ke 'member_name'
-    });
+    final name = prefs.getString('member_name');
+    if (name != null && name.isNotEmpty) {
+      setState(() {
+        memberName = name;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Salam personal
+          Row(
             children: [
-              Text(
-                'Hello, $userName!',
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              CircleAvatar(
+                radius: 28,
+                // ignore: deprecated_member_use
+                backgroundColor: Colors.indigo.withOpacity(0.1),
+                child: const Icon(Icons.person, size: 36, color: Colors.indigo),
               ),
-              const SizedBox(height: 4),
-              const Text(
-                'Access All Your Favorite Reads',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              const SizedBox(height: 16),
-              FutureBuilder<List<dynamic>>(
-                future: _categoriesFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return const Text('Gagal memuat kategori');
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Text('Tidak ada kategori tersedia');
-                  } else {
-                    final categories = snapshot.data!;
-                    return SizedBox(
-                      height: 40,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: categories
-                            .map((category) => Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                                  child: Chip(label: Text(category['name'])),
-                                ))
-                            .toList(),
-                      ),
-                    );
-                  }
-                },
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'New Book',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              FutureBuilder<List<dynamic>>(
-                future: _latestBooksFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return const Text('Gagal memuat buku terbaru');
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Text('Tidak ada buku terbaru');
-                  } else {
-                    final books = snapshot.data!;
-                    return SizedBox(
-                      height: 160,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: books.length,
-                        itemBuilder: (context, index) {
-                          final book = books[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 12),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Column(
-                                children: [
-                                  Image.network(
-                                    book['cover_url'], // Pastikan API mengembalikan URL gambar
-                                    width: 100,
-                                    height: 120,
-                                    fit: BoxFit.cover,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    book['title'],
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  }
-                },
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Hello, $memberName 👋',
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Selamat datang di Perpustakaan!',
+                    style: TextStyle(fontSize: 15, color: Colors.grey),
+                  ),
+                ],
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 28),
+
+          // Kategori Card dari API
+          FutureBuilder<List<dynamic>>(
+            future: _categoriesFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SizedBox(
+                  height: 110,
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              } else if (snapshot.hasError) {
+                return const SizedBox(
+                  height: 110,
+                  child: Center(child: Text('Gagal memuat kategori')),
+                );
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const SizedBox(
+                  height: 110,
+                  child: Center(child: Text('Tidak ada kategori')),
+                );
+              }
+              final categories = snapshot.data!;
+              return SizedBox(
+                height: 110,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: categories.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 16),
+                  itemBuilder: (context, index) {
+                    final cat = categories[index];
+                    return Card(
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      color: Theme.of(context).cardColor,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(18),
+                        onTap: () {
+                          // Navigasi sesuai kategori
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const BookListScreen(), // Bisa filter kategori di BookListScreen
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 110,
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.category, size: 36, color: Colors.indigo),
+                              const SizedBox(height: 10),
+                              Text(
+                                cat['name'] ?? '-',
+                                style: const TextStyle(fontWeight: FontWeight.w600),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 32),
+
+          // Rekomendasi Buku dari API
+          Text(
+            'Rekomendasi Hari Ini',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          FutureBuilder<List<dynamic>>(
+            future: _recommendationFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return const Center(child: Text('Gagal memuat rekomendasi buku'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Center(child: Text('Tidak ada rekomendasi buku.'));
+              }
+              final books = snapshot.data!;
+              return Column(
+                children: books.take(5).map((book) {
+                  return Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 2,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: ListTile(
+                      leading: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          // ignore: deprecated_member_use
+                          color: Colors.indigo.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.menu_book, color: Colors.indigo, size: 32),
+                      ),
+                      title: Text(book['title'] ?? 'Tanpa Judul'),
+                      subtitle: Text(book['author'] ?? '-'),
+                      trailing: Icon(Icons.chevron_right, color: Colors.grey[400]),
+                      onTap: () {
+                        // Navigasi ke detail buku jika ada
+                      },
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

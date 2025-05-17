@@ -14,7 +14,9 @@ class ReturnScreen extends StatefulWidget {
 class _ReturnScreenState extends State<ReturnScreen> {
   final ApiService apiService = ApiService();
   late Future<List<dynamic>> _returnsFuture;
+  // ignore: unused_field
   bool _isReturning = false;
+  // ignore: unused_field
   int? _returningLoanId;
 
   @override
@@ -29,6 +31,7 @@ class _ReturnScreenState extends State<ReturnScreen> {
     });
   }
 
+  // ignore: unused_element
   Future<void> _returnBook(int loanId) async {
     setState(() {
       _isReturning = true;
@@ -84,6 +87,7 @@ class _ReturnScreenState extends State<ReturnScreen> {
             itemCount: loans.length,
             itemBuilder: (context, index) {
               final loan = loans[index];
+              // ignore: unused_local_variable
               final loanId = loan['id'];
 
               return Card(
@@ -100,17 +104,7 @@ class _ReturnScreenState extends State<ReturnScreen> {
                       if (loan['due_date'] != null)
                         Text('Jatuh Tempo: ${loan['due_date']}'),
                     ],
-                  ),
-                  trailing: _isReturning && _returningLoanId == loanId
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : ElevatedButton(
-                          onPressed: () => _returnBook(loanId),
-                          child: const Text('Kembalikan'),
-                        ),
+                  ),    
                 ),
               );
             },

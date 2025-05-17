@@ -240,23 +240,25 @@ class _BookListScreenState extends State<BookListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF8F94FB),
-        elevation: 0,
-        title: const Text('📚 Daftar Buku'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              _loadBooks();
-              _loadMemberId();
-            },
-          ),
-        ],
-      ),
+  final theme = Theme.of(context);
+
+  return Scaffold(
+    backgroundColor: theme.scaffoldBackgroundColor,
+    appBar: AppBar(
+      backgroundColor: theme.appBarTheme.backgroundColor ?? theme.primaryColor,
+      elevation: 0,
+      title: const Text('📚 Daftar Buku'),
+      centerTitle: true,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: () {
+            _loadBooks();
+            _loadMemberId();
+          },
+        ),
+      ],
+    ),
       body: FutureBuilder<List<dynamic>>(
         future: _booksFuture,
         builder: (context, snapshot) {
